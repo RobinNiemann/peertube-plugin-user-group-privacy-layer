@@ -1,13 +1,13 @@
 {
-  "name": "peertube-plugin-quickstart-typescript",
-  "description": "PeerTube plugin quickstart typescript",
-  "version": "1.0.0",
+  "name": "peertube-plugin-user-group-sharing",
+  "description": "A Peertube Plugin to define groups of users and then share videos/playlists only with certain groups",
+  "version": "0.1.0",
   "license": "AGPL-3.0",
   "author": {
-    "name": "John Livingston",
-    "url": "https://github.com/JohnXLivingston"
+    "name": "Robin Niemann",
+    "url": "https://github.com/RobinNiemann"
   },
-  "bugs": "https://github.com/JohnXLivingston/peertube-plugin-quickstart-typescript/issues",
+  "bugs": "https://github.com/RN-Software-Services/peertube-plugin-user-group-sharing/issues",
   "clientScripts": [
     {
       "script": "dist/client/common-client-plugin.js",
@@ -22,7 +22,7 @@
   "engine": {
     "peertube": ">=4.2.0"
   },
-  "homepage": "https://github.com/JohnXLivingston/peertube-plugin-quickstart-typescript",
+  "homepage": "https://github.com/RN-Software-Services/peertube-plugin-user-group-sharing",
   "keywords": [
     "peertube",
     "plugin"
