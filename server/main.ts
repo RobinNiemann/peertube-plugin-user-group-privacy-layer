@@ -1,7 +1,7 @@
 import type { RegisterServerOptions } from '@peertube/peertube-types'
 import { setupApi, setupDb } from './setup'
 
-async function register ({ peertubeHelpers, getRouter, registerHook }: RegisterServerOptions): Promise<void> {
+async function register ({ peertubeHelpers, getRouter, registerSetting }: RegisterServerOptions): Promise<void> {
   await setupDb(peertubeHelpers)
 
   const router = getRouter()
@@ -14,6 +14,15 @@ async function register ({ peertubeHelpers, getRouter, registerHook }: RegisterS
       next(error); // Fehler an die Middleware weiterleiten
     }
   });
+
+  registerSetting({
+    name: "user-group-definition",
+    label: 'User Group Definition',
+    type: 'markdown-text',
+    private: true
+  })
+
+
   setupApi(router, peertubeHelpers)
 }
 
