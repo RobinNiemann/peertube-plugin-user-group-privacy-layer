@@ -22,6 +22,11 @@ async function register ({ peertubeHelpers, getRouter, registerSetting, settings
 
   // GET /user-groups - Liste aller Gruppen des aktuellen Benutzers
   router.get('/user-groups', async (req, res, next) => {
+    const authUser = await peertubeHelpers.user.getAuthUser(res)
+    if (!authUser) {
+      res.status(401).json({ error: 'Unauthorized' })
+      return
+    }
     try {
       const userGroups = await settingsManager.getSetting('user-group-definition')
       res.json(userGroups)

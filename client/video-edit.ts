@@ -9,7 +9,7 @@ async function register({
 
     const { translate } = peertubeHelpers
 
-    const api = new Api()
+    const api = new Api(peertubeHelpers.getAuthHeader)
     console.log(await api.getUserGroups())
 
     const types: Array<RegisterClientVideoFieldOptions['type']> =
