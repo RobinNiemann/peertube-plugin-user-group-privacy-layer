@@ -7,8 +7,13 @@ async function register ({ peertubeHelpers, getRouter, registerHook }: RegisterS
   const router = getRouter()
 
   // Erreichbar via http://peertube.localhost:9000/plugins/user-group-sharing/router/ping
-  router.get('/ping', (req, res) => res.json({ message: 'pong' }))
-
+  router.get('/ping', (req, res, next) => {
+    try {
+      res.status(200).json({ message: 'pong' });
+    } catch (error) {
+      next(error); // Fehler an die Middleware weiterleiten
+    }
+  });
   setupApi(router, peertubeHelpers)
 }
 

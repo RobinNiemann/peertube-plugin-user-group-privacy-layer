@@ -20,7 +20,7 @@
     "dist/assets/style.css"
   ],
   "engine": {
-    "peertube": ">=4.2.0"
+    "peertube": ">=7.1.0"
   },
   "homepage": "https://github.com/RN-Software-Services/peertube-plugin-user-group-sharing",
   "keywords": [
@@ -47,7 +47,7 @@
     "fr-FR": "./languages/fr.json"
   },
   "devDependencies": {
-    "@peertube/peertube-types": "^4.2.2",
+    "@peertube/peertube-types": "^7.1.0",
     "@tsconfig/node16": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
