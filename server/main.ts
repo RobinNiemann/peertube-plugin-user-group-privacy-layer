@@ -1,8 +1,10 @@
 import type { RegisterServerOptions } from '@peertube/peertube-types'
+import { GroupManager } from './group-manager'
 
 async function register({ peertubeHelpers, getRouter, registerSetting, settingsManager }: RegisterServerOptions): Promise<void> {
 
   const router = getRouter()
+  const groupManager = new GroupManager(settingsManager)
 
   registerSetting({
     name: "user-group-definition",
@@ -14,14 +16,13 @@ async function register({ peertubeHelpers, getRouter, registerSetting, settingsM
   // GET /user-groups - Liste aller Gruppen des aktuellen Benutzers
   router.get('/user-groups', async (req, res, next) => {
     const authUser = await peertubeHelpers.user.getAuthUser(res)
-    peertubeHelpers.logger.info(authUser.username)
-    
     if (!authUser) {
       res.status(401).json({ error: 'Unauthorized' })
       return
     }
+
     try {
-      const userGroups = await settingsManager.getSetting('user-group-definition')
+      const userGroups = await groupManager.getGroupsForUser(authUser.username)
       res.json(userGroups)
     } catch (error: unknown) {
       peertubeHelpers.logger.error('Error fetching user groups:', error)
