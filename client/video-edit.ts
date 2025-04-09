@@ -6,35 +6,24 @@ async function register({
     registerVideoField,
     peertubeHelpers
 }: RegisterClientOptions): Promise<void> {
-
-    const { translate } = peertubeHelpers
-
     const api = new Api(peertubeHelpers.getAuthHeader)
-    console.log(await api.getUserGroups())
+    const allUserGroups = await api.getUserGroups()
+    console.log(allUserGroups)
 
     const types: Array<RegisterClientVideoFieldOptions['type']> =
         ['update', 'upload', 'import-url', 'import-torrent', 'go-live']
 
     for (const type of types) {
-        registerVideoField({
-            name: "user-groups",
-            label: await translate('User groups'),
-            type: 'select',
-            options: [
-                {
-                    value: 'Dummy Group 1',
-                    label: await translate('Dummy Group 1')
-                },
-                {
-                    value: 'Dummy Group 2',
-                    label: await translate('Dummy Group 2')
-                }
-            ],
-            default: 'Dummy Group 2'
-        }, {
-            type,
-            tab: 'main'
-        })
+        for (const group of allUserGroups) {
+            registerVideoField({
+                name: "user-groups",
+                label: group,
+                type: 'input-checkbox',
+            }, {
+                type: type,
+                tab: 'plugin-settings'
+            })
+        }
     }
 }
 
