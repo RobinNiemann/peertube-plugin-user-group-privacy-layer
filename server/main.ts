@@ -1,6 +1,6 @@
 import type { RegisterServerOptions } from '@peertube/peertube-types'
 
-async function register ({ peertubeHelpers, getRouter, registerSetting, settingsManager }: RegisterServerOptions): Promise<void> {
+async function register({ peertubeHelpers, getRouter, registerSetting, settingsManager }: RegisterServerOptions): Promise<void> {
 
   const router = getRouter()
 
@@ -14,6 +14,8 @@ async function register ({ peertubeHelpers, getRouter, registerSetting, settings
   // GET /user-groups - Liste aller Gruppen des aktuellen Benutzers
   router.get('/user-groups', async (req, res, next) => {
     const authUser = await peertubeHelpers.user.getAuthUser(res)
+    peertubeHelpers.logger.info(authUser.username)
+    
     if (!authUser) {
       res.status(401).json({ error: 'Unauthorized' })
       return
@@ -28,9 +30,7 @@ async function register ({ peertubeHelpers, getRouter, registerSetting, settings
   })
 }
 
-async function unregister (): Promise<void> {
-  // Cleanup wird in setup.ts gehandhabt
-}
+async function unregister(): Promise<void> { }
 
 module.exports = {
   register,
