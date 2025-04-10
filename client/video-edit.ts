@@ -16,7 +16,7 @@ async function register({
     for (const type of types) {
         for (const group of allUserGroups) {
             registerVideoField({
-                name: "user-groups",
+                name: group,
                 label: group,
                 type: 'input-checkbox',
             }, {
