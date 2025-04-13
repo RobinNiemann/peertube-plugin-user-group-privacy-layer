@@ -1,8 +1,19 @@
 import { MVideoFullLight } from "@peertube/peertube-types"
+import * as express from "express"
 
-export type Params ={
+export type VideoUpdateParams = {
     video: MVideoFullLight
-    body: any
-    req: any
-    res: any
+    body: {
+        pluginData?: {
+            [key: string]: any
+        }
+    }
+    req: express.Request
+    res: express.Response
+}
+
+export type GetVideoParams = {
+    id: number
+    userId: number
+    req: express.Request
 }

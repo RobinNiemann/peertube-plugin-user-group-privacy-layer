@@ -1,5 +1,5 @@
-import { MVideo, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions } from "@peertube/peertube-types";
-import { Params } from "../model/params";
+import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions } from "@peertube/peertube-types";
+import { GetVideoParams, VideoUpdateParams } from "../model/params";
 
 
 export class HookHandlerFactory {
@@ -10,19 +10,19 @@ export class HookHandlerFactory {
   }
 
   createVideoUpdatedHandler(): Function {
-    return async (params: Params) => {
+    return async (params: VideoUpdateParams) => {
 
       this.peertubeHelpers.logger.warn("Jetzt läuft action:api.video.updated")
       this.peertubeHelpers.logger.info(params.video.constructor.name)
-      this.peertubeHelpers.logger.info(Object.keys(params.body.pluginData))
       this.peertubeHelpers.logger.info(params.body.pluginData?.['Gruppe 1'])
       this.peertubeHelpers.logger.info(params.body.pluginData?.['Gruppe 2'])
       this.peertubeHelpers.logger.info(params.video.name)
+      this.peertubeHelpers.logger.info(params.video.id)
 
     }
   }
 
-  createVideoUpdatedAllowsHandler(): Function {
+  createVideoDownloadAllowedHandler(): Function {
     return async (
       result: any,
       params: { video: MVideoFullLight }
@@ -38,13 +38,21 @@ export class HookHandlerFactory {
   
   createGetVideoHandler(): Function {
     return async (
-      result: any,
-      params: any
+      result: MVideoFormattableDetails,
+      params: GetVideoParams
     ): Promise<MVideo> => {
 
       this.peertubeHelpers.logger.warn("Jetzt läuft filter:api.video.get.result")
       this.peertubeHelpers.logger.info(Object.keys(result))
-      this.peertubeHelpers.logger.info(Object.keys(params))
+      
+      const videoId = params.id;
+      const userId = params.userId;
+
+      result.VideoStreamingPlaylists
+      if (videoId === 3){
+        result.uuid = ""
+        throw new Error(`${videoId} is not allowed for user ${userId}`)
+      }
 
       return result
     }
