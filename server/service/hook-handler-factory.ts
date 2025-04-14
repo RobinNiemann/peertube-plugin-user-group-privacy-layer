@@ -44,29 +44,15 @@ export class HookHandlerFactory {
     ): Promise<MVideo> => {
 
       this.logger.warn("Jetzt läuft filter:api.video.get.result")
-      this.logger.info(Object.keys(result))
 
       const videoId = params.id;
       const userId = params.userId;
-
-      result.VideoStreamingPlaylists
+      
       if (videoId === 3) {
         result.uuid = ""
-        throw new Error(`${videoId} is not allowed for user ${userId}`)
+        params.req.res?.statusCode == 400
+        this.logger.warn(`${videoId} is not allowed for user ${userId}`)
       }
-
-      return result
-    }
-  }
-
-  createVideoListParamsHandler(): Function {
-    return async (
-      result: any,
-      params: any): Promise<any> => {
-
-      this.logger.warn("VideoListParamsHandler")
-      this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(params))
 
       return result
     }
@@ -79,7 +65,11 @@ export class HookHandlerFactory {
 
       this.logger.warn("VideoListResultHandler")
       this.logger.info(Object.keys(result.data))
-      this.logger.info(result.total)
+      this.logger.info(result.total)     
+      result.data = result.data.filter((video: MVideoFormattableDetails) => {
+        return video.uuid !== "54ebe022-f4dc-41f2-a6af-d021f67e638e"
+      })
+      result.total = result.data.length
 
       this.logger.info(Object.keys(params.user))
 
@@ -102,6 +92,7 @@ export class HookHandlerFactory {
       result.data = result.data.filter((video: MVideoFormattableDetails) => {
         return video.uuid !== "54ebe022-f4dc-41f2-a6af-d021f67e638e"
       })
+      result.total = result.data.length
 
       this.logger.info(params.user.id + " " + params.user.username)
 
