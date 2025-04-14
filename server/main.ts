@@ -31,7 +31,20 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     target: 'filter:api.video.get.result',
     handler: hookHandlerFactory.createGetVideoHandler()
   })
-}
+
+  // registerHook({
+  //   target: 'filter:api.videos.list.params',
+  //   handler: hookHandlerFactory.createVideoListParamsHandler()
+  // })
+  // registerHook({
+  //   target: 'filter:api.videos.list.result',
+  //   handler: hookHandlerFactory.createVideoListResultHandler()
+  // })
+  registerHook({
+    target: 'filter:api.search.videos.local.list.result',
+    handler: hookHandlerFactory.createVideoSearchHandler()
+  })
+  }
 
 async function unregister(): Promise<void> { }
 

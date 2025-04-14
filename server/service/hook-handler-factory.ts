@@ -1,23 +1,24 @@
-import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions } from "@peertube/peertube-types";
-import { GetVideoParams, VideoUpdateParams } from "../model/params";
+import { Logger } from 'winston';
+import { MVideo, MVideoFormattableDetails, MVideoFullLight, RegisterServerOptions } from "@peertube/peertube-types";
+import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams } from "../model/params";
 
 
 export class HookHandlerFactory {
-  private peertubeHelpers: PeerTubeHelpers
+  private logger: Logger
 
   constructor(registerServerOptions: RegisterServerOptions) {
-    this.peertubeHelpers = registerServerOptions.peertubeHelpers;
+    this.logger = registerServerOptions.peertubeHelpers.logger;
   }
 
   createVideoUpdatedHandler(): Function {
     return async (params: VideoUpdateParams) => {
 
-      this.peertubeHelpers.logger.warn("Jetzt läuft action:api.video.updated")
-      this.peertubeHelpers.logger.info(params.video.constructor.name)
-      this.peertubeHelpers.logger.info(params.body.pluginData?.['Gruppe 1'])
-      this.peertubeHelpers.logger.info(params.body.pluginData?.['Gruppe 2'])
-      this.peertubeHelpers.logger.info(params.video.name)
-      this.peertubeHelpers.logger.info(params.video.id)
+      this.logger.warn("Jetzt läuft action:api.video.updated")
+      this.logger.info(params.video.constructor.name)
+      this.logger.info(params.body.pluginData?.['Gruppe 1'])
+      this.logger.info(params.body.pluginData?.['Gruppe 2'])
+      this.logger.info(params.video.name)
+      this.logger.info(params.video.id)
 
     }
   }
@@ -27,29 +28,29 @@ export class HookHandlerFactory {
       result: any,
       params: { video: MVideoFullLight }
     ): Promise<any> => {
-      this.peertubeHelpers.logger.warn("Jetzt läuft filter:api.download.video.allowed.result")
-      this.peertubeHelpers.logger.info(Object.keys(result))
-      this.peertubeHelpers.logger.info(Object.keys(params))
+      this.logger.warn("Jetzt läuft filter:api.download.video.allowed.result")
+      this.logger.info(Object.keys(result))
+      this.logger.info(Object.keys(params))
 
       return result
     }
   }
 
-  
+
   createGetVideoHandler(): Function {
     return async (
       result: MVideoFormattableDetails,
       params: GetVideoParams
     ): Promise<MVideo> => {
 
-      this.peertubeHelpers.logger.warn("Jetzt läuft filter:api.video.get.result")
-      this.peertubeHelpers.logger.info(Object.keys(result))
-      
+      this.logger.warn("Jetzt läuft filter:api.video.get.result")
+      this.logger.info(Object.keys(result))
+
       const videoId = params.id;
       const userId = params.userId;
 
       result.VideoStreamingPlaylists
-      if (videoId === 3){
+      if (videoId === 3) {
         result.uuid = ""
         throw new Error(`${videoId} is not allowed for user ${userId}`)
       }
@@ -57,4 +58,55 @@ export class HookHandlerFactory {
       return result
     }
   }
+
+  createVideoListParamsHandler(): Function {
+    return async (
+      result: any,
+      params: any): Promise<any> => {
+
+      this.logger.warn("VideoListParamsHandler")
+      this.logger.info(Object.keys(result))
+      this.logger.info(Object.keys(params))
+
+      return result
+    }
+  }
+
+  createVideoListResultHandler(): Function {
+    return async (
+      result: {data: any, total: number},
+      params: VideoListResultParams): Promise<any> => {
+
+      this.logger.warn("VideoListResultHandler")
+      this.logger.info(Object.keys(result.data))
+      this.logger.info(result.total)
+
+      this.logger.info(Object.keys(params.user))
+
+      return result
+    }
+  }
+
+
+  createVideoSearchHandler(): Function {
+    return async (
+      result: {data: Array<MVideoFormattableDetails>, total: number},
+      params: VideoSearchParams): Promise<any> => {
+
+      this.logger.warn("VideoSearchHandler")
+
+      this.logger.info("VideoId: " + result.data[0].id + " UUID: " + result.data[0].uuid)
+      this.logger.info("VideoId: " + result.data[1].id + " UUID: " + result.data[1].uuid)
+      this.logger.info("Total:" + result.total)
+      
+      result.data = result.data.filter((video: MVideoFormattableDetails) => {
+        return video.uuid !== "54ebe022-f4dc-41f2-a6af-d021f67e638e"
+      })
+
+      this.logger.info(params.user.id + " " + params.user.username)
+
+      return result
+    }
+  }
+
 }
