@@ -1,6 +1,7 @@
 import { Logger } from 'winston';
 import { MVideo, MVideoFormattableDetails, MVideoFullLight, RegisterServerOptions } from "@peertube/peertube-types";
 import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams } from "../model/params";
+import * as express from "express"
 
 
 export class HookHandlerFactory {
@@ -26,11 +27,32 @@ export class HookHandlerFactory {
   createVideoDownloadAllowedHandler(): Function {
     return async (
       result: any,
-      params: { video: MVideoFullLight }
+      params: { video: MVideoFullLight , req: express.Request}
     ): Promise<any> => {
       this.logger.warn("Jetzt läuft filter:api.download.video.allowed.result")
       this.logger.info(Object.keys(result))
       this.logger.info(Object.keys(params))
+
+      if (result.uuid === "54ebe022-f4dc-41f2-a6af-d021f67e638e") {
+        params.req.res!.statusCode = 400
+        result.uuid = ""
+      }
+
+      return result
+    }
+  }
+  createGeneratedVideoDownloadAllowedHandler(): Function {
+    return async (
+      result: any,
+      params: { video: MVideoFullLight , req: express.Request}
+    ): Promise<any> => {
+      this.logger.warn("Jetzt läuft filter:api.download.generated-video.allowed.result")
+      this.logger.info(Object.keys(result))
+      this.logger.info(Object.keys(params))
+
+      if (params.video.uuid === "54ebe022-f4dc-41f2-a6af-d021f67e638e") {
+        params.req.res!.statusCode = 400
+      }
 
       return result
     }
@@ -50,7 +72,7 @@ export class HookHandlerFactory {
       
       if (videoId === 3) {
         result.uuid = ""
-        params.req.res?.statusCode == 400
+        params.req.res!.statusCode = 400
         this.logger.warn(`${videoId} is not allowed for user ${userId}`)
       }
 

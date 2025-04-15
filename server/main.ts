@@ -26,6 +26,10 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     target: 'filter:api.download.video.allowed.result',
     handler: hookHandlerFactory.createVideoDownloadAllowedHandler()
   })
+  registerHook({
+    target: 'filter:api.download.generated-video.allowed.result',
+    handler: hookHandlerFactory.createGeneratedVideoDownloadAllowedHandler()
+  })
 
   registerHook({
     target: 'filter:api.video.get.result',
