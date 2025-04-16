@@ -1,14 +1,16 @@
 import { Logger } from 'winston';
-import { MVideo, MVideoFormattableDetails, MVideoFullLight, RegisterServerOptions } from "@peertube/peertube-types";
+import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions } from "@peertube/peertube-types";
 import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams } from "../model/params";
 import * as express from "express"
 
 
 export class HookHandlerFactory {
   private logger: Logger
+  private peertubeHelpers: PeerTubeHelpers
 
   constructor(registerServerOptions: RegisterServerOptions) {
     this.logger = registerServerOptions.peertubeHelpers.logger;
+    this.peertubeHelpers = registerServerOptions.peertubeHelpers;
   }
 
   createVideoUpdatedHandler(): Function {
@@ -66,11 +68,17 @@ export class HookHandlerFactory {
     ): Promise<MVideo> => {
 
       this.logger.warn("Jetzt läuft filter:api.video.get.result")
+      this.logger.info(Object.keys(result))
+      this.logger.info(Object.keys(params))
 
       const videoId = params.id;
-      const userId = params.userId;
+      // const videoUuid = result.uuid
+      let userId = params.userId;
+      const authUser = await this.peertubeHelpers.user.getAuthUser(params.req.res!)
+      userId = authUser?.id || -1
+      this.logger.info("UserId: " + userId + " user: " + authUser)
       
-      if (videoId === 3) {
+      if (videoId === 3 && userId !== 2) {
         result.uuid = ""
         params.req.res!.statusCode = 400
         this.logger.warn(`${videoId} is not allowed for user ${userId}`)
@@ -102,13 +110,14 @@ export class HookHandlerFactory {
 
   createVideoSearchHandler(): Function {
     return async (
-      result: {data: Array<MVideoFormattableDetails>, total: number},
+      result: {data: Array<MVideoFormattableDetails>, total?: number},
       params: VideoSearchParams): Promise<any> => {
 
       this.logger.warn("VideoSearchHandler")
 
-      this.logger.info("VideoId: " + result.data[0].id + " UUID: " + result.data[0].uuid)
-      this.logger.info("VideoId: " + result.data[1].id + " UUID: " + result.data[1].uuid)
+      for (let video of result.data) {
+        this.logger.info("VideoId: " + video.id + " UUID: " + video.uuid)
+      }
       this.logger.info("Total:" + result.total)
       
       result.data = result.data.filter((video: MVideoFormattableDetails) => {
