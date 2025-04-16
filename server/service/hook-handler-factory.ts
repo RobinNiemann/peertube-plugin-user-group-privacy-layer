@@ -33,14 +33,14 @@ export class HookHandlerFactory {
       this.logger.info(Object.keys(result))
       this.logger.info(Object.keys(params))
 
-      if (result.uuid === "54ebe022-f4dc-41f2-a6af-d021f67e638e") {
+      if (params.video.uuid === "54ebe022-f4dc-41f2-a6af-d021f67e638e") {
         params.req.res!.statusCode = 400
-        result.uuid = ""
       }
 
       return result
     }
   }
+
   createGeneratedVideoDownloadAllowedHandler(): Function {
     return async (
       result: any,
