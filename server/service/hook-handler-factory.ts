@@ -1,5 +1,5 @@
 import { Logger } from 'winston';
-import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions } from "@peertube/peertube-types";
+import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement } from "@peertube/peertube-types";
 import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams } from "../model/params";
 import * as express from "express"
 
@@ -29,7 +29,7 @@ export class HookHandlerFactory {
   createVideoDownloadAllowedHandler(): Function {
     return async (
       result: any,
-      params: { video: MVideoFullLight , req: express.Request}
+      params: { video: MVideoFullLight, req: express.Request }
     ): Promise<any> => {
       this.logger.warn("Jetzt läuft filter:api.download.video.allowed.result")
       this.logger.info(Object.keys(result))
@@ -46,7 +46,7 @@ export class HookHandlerFactory {
   createGeneratedVideoDownloadAllowedHandler(): Function {
     return async (
       result: any,
-      params: { video: MVideoFullLight , req: express.Request}
+      params: { video: MVideoFullLight, req: express.Request }
     ): Promise<any> => {
       this.logger.warn("Jetzt läuft filter:api.download.generated-video.allowed.result")
       this.logger.info(Object.keys(result))
@@ -77,7 +77,7 @@ export class HookHandlerFactory {
       const authUser = await this.peertubeHelpers.user.getAuthUser(params.req.res!)
       userId = authUser?.id || -1
       this.logger.info("UserId: " + userId + " user: " + authUser)
-      
+
       if (videoId === 3 && userId !== 2) {
         result.uuid = ""
         params.req.res!.statusCode = 400
@@ -90,12 +90,12 @@ export class HookHandlerFactory {
 
   createVideoListResultHandler(): Function {
     return async (
-      result: {data: any, total: number},
+      result: { data: any, total: number },
       params: VideoListResultParams): Promise<any> => {
 
       this.logger.warn("VideoListResultHandler")
       this.logger.info(Object.keys(result.data))
-      this.logger.info(result.total)     
+      this.logger.info(result.total)
       result.data = result.data.filter((video: MVideoFormattableDetails) => {
         return video.uuid !== "54ebe022-f4dc-41f2-a6af-d021f67e638e"
       })
@@ -110,7 +110,7 @@ export class HookHandlerFactory {
 
   createVideoSearchHandler(): Function {
     return async (
-      result: {data: Array<MVideoFormattableDetails>, total?: number},
+      result: { data: Array<MVideoFormattableDetails>, total?: number },
       params: VideoSearchParams): Promise<any> => {
 
       this.logger.warn("VideoSearchHandler")
@@ -119,7 +119,7 @@ export class HookHandlerFactory {
         this.logger.info("VideoId: " + video.id + " UUID: " + video.uuid)
       }
       this.logger.info("Total:" + result.total)
-      
+
       result.data = result.data.filter((video: MVideoFormattableDetails) => {
         return video.uuid !== "54ebe022-f4dc-41f2-a6af-d021f67e638e"
       })
@@ -127,6 +127,44 @@ export class HookHandlerFactory {
 
       this.logger.info(params.user.id + " " + params.user.username)
 
+      return result
+    }
+  }
+
+  createVideoPlaylistHandler(): Function {
+    return async (
+      result: {
+        total: any,
+        data: MVideoPlaylistElement
+      },
+      params: any
+    ): Promise<any> => {
+
+      this.logger.warn("createVideoPlaylistHandler")
+      this.logger.info(Object.keys(result))
+      this.logger.info(Object.keys(result.data))
+      this.logger.info(result.data)
+      this.logger.info(result.data.videoId)
+      this.logger.info(result.data.url)
+      this.logger.info(result.total)
+      this.logger.info(Object.keys(params))
+      this.logger.info(params.count)
+      this.logger.info(params.videoPlaylistId)
+
+      return result
+    }
+  }
+
+  createVideoPlaylistSearchHandler(): Function {
+    return async (
+      result: any,
+      params: any
+    ): Promise<any> => {
+
+      this.logger.warn("createVideoPlaylistSearchHandler")
+      this.logger.info(Object.keys(result))
+      this.logger.info(Object.keys(result.data))
+      this.logger.info(Object.keys(params))
       return result
     }
   }

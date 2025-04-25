@@ -44,15 +44,23 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     target: 'filter:api.search.videos.local.list.result',
     handler: hookHandlerFactory.createVideoSearchHandler()
   })
+  registerHook({
+    target: 'filter:api.video-playlist.videos.list.result',
+    handler: hookHandlerFactory.createVideoPlaylistHandler()
+  })
+  registerHook({
+    target: 'filter:api.search.video-playlists.local.list.result',
+    handler: hookHandlerFactory.createVideoPlaylistSearchHandler()
+  })
+
 
   //  TODO
-  // 'filter:api.video-playlist.videos.list.result'
   // 'filter:api.accounts.videos.list.result'
   // 'filter:api.video-channels.videos.list.result'
   // 'filter:api.overviews.videos.list.result'
   // 'filter:api.user.me.subscription-videos.list.result'
   // 'filter:api.search.video-channels.local.list.result'
-  // 'filter:api.search.video-playlists.local.list.result'
+  // ''
   // 'filter:html.embed.video.allowed.result'
   // 'filter:html.embed.video-playlist.allowed.result'
 
