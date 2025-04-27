@@ -2,26 +2,28 @@ import { Logger } from 'winston';
 import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement } from "@peertube/peertube-types";
 import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams } from "../model/params";
 import * as express from "express"
+import { GroupPermissionService } from './group-permission-service';
 
 
 export class HookHandlerFactory {
   private logger: Logger
   private peertubeHelpers: PeerTubeHelpers
 
-  constructor(registerServerOptions: RegisterServerOptions) {
+  constructor(
+    registerServerOptions: RegisterServerOptions,
+    private groupPermissionServices: GroupPermissionService
+  ) {
     this.logger = registerServerOptions.peertubeHelpers.logger;
     this.peertubeHelpers = registerServerOptions.peertubeHelpers;
   }
 
   createVideoUpdatedHandler(): Function {
     return async (params: VideoUpdateParams) => {
-
       this.logger.warn("Jetzt läuft action:api.video.updated")
-      this.logger.info(params.video.constructor.name)
-      this.logger.info(params.body.pluginData?.['Gruppe 1'])
-      this.logger.info(params.body.pluginData?.['Gruppe 2'])
-      this.logger.info(params.video.name)
-      this.logger.info(params.video.id)
+
+      if (params.body.pluginData) {
+        this.groupPermissionServices.setPermissionsForVideo(params.video.id, params.body.pluginData)
+      }
 
     }
   }
@@ -32,11 +34,9 @@ export class HookHandlerFactory {
       params: { video: MVideoFullLight, req: express.Request }
     ): Promise<any> => {
       this.logger.warn("Jetzt läuft filter:api.download.video.allowed.result")
-      this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(params))
 
-      if (params.video.uuid === "54ebe022-f4dc-41f2-a6af-d021f67e638e") {
-        params.req.res!.statusCode = 400
+      if (this.groupPermissionServices.isUserAllowedForVideo(await this.getUserId(params), params.video.id)) {
+        this.rejectRequest(params);
       }
 
       return result
@@ -49,11 +49,9 @@ export class HookHandlerFactory {
       params: { video: MVideoFullLight, req: express.Request }
     ): Promise<any> => {
       this.logger.warn("Jetzt läuft filter:api.download.generated-video.allowed.result")
-      this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(params))
 
-      if (params.video.uuid === "54ebe022-f4dc-41f2-a6af-d021f67e638e") {
-        params.req.res!.statusCode = 400
+      if (this.groupPermissionServices.isUserAllowedForVideo(await this.getUserId(params), params.video.id)) {
+        this.rejectRequest(params);
       }
 
       return result
@@ -68,25 +66,18 @@ export class HookHandlerFactory {
     ): Promise<MVideo> => {
 
       this.logger.warn("Jetzt läuft filter:api.video.get.result")
-      this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(params))
 
       const videoId = params.id;
-      // const videoUuid = result.uuid
-      let userId = params.userId;
-      const authUser = await this.peertubeHelpers.user.getAuthUser(params.req.res!)
-      userId = authUser?.id || -1
-      this.logger.info("UserId: " + userId + " user: " + authUser)
+      const userId = await this.getUserId(params);
 
-      if (videoId === 3 && userId !== 2) {
-        result.uuid = ""
-        params.req.res!.statusCode = 400
-        this.logger.warn(`${videoId} is not allowed for user ${userId}`)
+      if (!this.groupPermissionServices.isUserAllowedForVideo(userId, videoId)) {
+        this.rejectRequest(params)
       }
 
       return result
     }
   }
+
 
   createVideoListResultHandler(): Function {
     return async (
@@ -94,14 +85,12 @@ export class HookHandlerFactory {
       params: VideoListResultParams): Promise<any> => {
 
       this.logger.warn("VideoListResultHandler")
-      this.logger.info(Object.keys(result.data))
-      this.logger.info(result.total)
-      result.data = result.data.filter((video: MVideoFormattableDetails) => {
-        return video.uuid !== "54ebe022-f4dc-41f2-a6af-d021f67e638e"
-      })
-      result.total = result.data.length
 
-      this.logger.info(Object.keys(params.user))
+      const userId = params.user.id
+      result.data = result.data
+        .filter((video: MVideoFormattableDetails) => this.groupPermissionServices.isUserAllowedForVideo(userId, video.id))
+
+      result.total = result.data.length
 
       return result
     }
@@ -115,17 +104,9 @@ export class HookHandlerFactory {
 
       this.logger.warn("VideoSearchHandler")
 
-      for (let video of result.data) {
-        this.logger.info("VideoId: " + video.id + " UUID: " + video.uuid)
-      }
-      this.logger.info("Total:" + result.total)
-
-      result.data = result.data.filter((video: MVideoFormattableDetails) => {
-        return video.uuid !== "54ebe022-f4dc-41f2-a6af-d021f67e638e"
-      })
+      const userId = params.user.id
+      result.data = result.data.filter((video: MVideoFormattableDetails) => this.groupPermissionServices.isUserAllowedForVideo(userId, video.id))
       result.total = result.data.length
-
-      this.logger.info(params.user.id + " " + params.user.username)
 
       return result
     }
@@ -135,21 +116,16 @@ export class HookHandlerFactory {
     return async (
       result: {
         total: any,
-        data: MVideoPlaylistElement
+        data: MVideoPlaylistElement[]
       },
       params: any
     ): Promise<any> => {
 
       this.logger.warn("createVideoPlaylistHandler")
-      this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(result.data))
-      this.logger.info(result.data)
-      this.logger.info(result.data.videoId)
-      this.logger.info(result.data.url)
-      this.logger.info(result.total)
-      this.logger.info(Object.keys(params))
-      this.logger.info(params.count)
-      this.logger.info(params.videoPlaylistId)
+
+      const userId = params.user.id
+      result.data = result.data.filter((playlistElement: MVideoPlaylistElement) => this.groupPermissionServices.isUserAllowedForVideo(userId, playlistElement.videoId))
+      result.total = result.data.length
 
       return result
     }
@@ -163,10 +139,20 @@ export class HookHandlerFactory {
 
       this.logger.warn("createVideoPlaylistSearchHandler")
       this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(result.data))
+      this.logger.info(Object.keys(result.data[0]))
       this.logger.info(Object.keys(params))
       return result
     }
+  }
+
+  private async getUserId(params: { req: express.Request }) {
+    const authUser = await this.peertubeHelpers.user.getAuthUser(params.req.res!);
+    const userId = authUser?.id || -1;
+    return userId;
+  }
+  
+  private rejectRequest(params: { req: express.Request; }) {
+    params.req.res!.statusCode = 400;
   }
 
 }

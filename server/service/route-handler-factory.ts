@@ -1,14 +1,14 @@
-import { GroupManager } from './group-manager';
+import { GroupSettingsService } from './group-settings-service';
 import { PeerTubeHelpers, RegisterServerOptions } from '@peertube/peertube-types';
 import { RequestHandler, Response } from 'express';
 
 export class RouteHandlerFactory {
   private peertubeHelpers: PeerTubeHelpers;
-  private groupManager: GroupManager;
+  private groupManager: GroupSettingsService;
 
   constructor(registerServerOptions: RegisterServerOptions) {
     this.peertubeHelpers = registerServerOptions.peertubeHelpers;
-    this.groupManager = new GroupManager(registerServerOptions.settingsManager);
+    this.groupManager = new GroupSettingsService(registerServerOptions.settingsManager);
   }
 
   createUserGroupsRouteHandler(): RequestHandler {

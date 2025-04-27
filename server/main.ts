@@ -1,11 +1,13 @@
 import type { RegisterServerOptions } from '@peertube/peertube-types'
 import { RouteHandlerFactory } from './service/route-handler-factory'
 import { HookHandlerFactory } from './service/hook-handler-factory'
+import { GroupPermissionService } from './service/group-permission-service'
 
 async function register(registerServerOptions: RegisterServerOptions): Promise<void> {
   const { getRouter, registerSetting, registerHook } = registerServerOptions
   const routeHandlerFactory = new RouteHandlerFactory(registerServerOptions)
-  const hookHandlerFactory = new HookHandlerFactory(registerServerOptions)
+  const groupPermissionServices = new GroupPermissionService(registerServerOptions)
+  const hookHandlerFactory = new HookHandlerFactory(registerServerOptions, groupPermissionServices)
 
   registerSetting({
     name: "user-group-definition",

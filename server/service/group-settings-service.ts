@@ -1,7 +1,7 @@
 import { PluginSettingsManager } from "@peertube/peertube-types";
 import { UserGroup } from "../model/user-group";
 
-export class GroupManager {
+export class GroupSettingsService {
 
   constructor(private settingsManager: PluginSettingsManager) { }
 
