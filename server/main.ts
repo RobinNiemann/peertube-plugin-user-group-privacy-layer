@@ -23,7 +23,6 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     target: 'action:api.video.updated',
     handler: hookHandlerFactory.createVideoUpdatedHandler()
   })
-
   registerHook({
     target: 'filter:api.download.video.allowed.result',
     handler: hookHandlerFactory.createVideoDownloadAllowedHandler()
@@ -32,12 +31,10 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     target: 'filter:api.download.generated-video.allowed.result',
     handler: hookHandlerFactory.createGeneratedVideoDownloadAllowedHandler()
   })
-
   registerHook({
     target: 'filter:api.video.get.result',
     handler: hookHandlerFactory.createGetVideoHandler()
   })
-
   registerHook({
     target: 'filter:api.videos.list.result',
     handler: hookHandlerFactory.createVideoListResultHandler()
@@ -54,10 +51,13 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     target: 'filter:api.search.video-playlists.local.list.result',
     handler: hookHandlerFactory.createVideoPlaylistSearchHandler()
   })
+  registerHook({
+    target: 'filter:api.accounts.videos.list.result',
+    handler: hookHandlerFactory.getAccountVideosListHandler()
+  })
 
 
   //  TODO
-  // 'filter:api.accounts.videos.list.result'
   // 'filter:api.video-channels.videos.list.result'
   // 'filter:api.overviews.videos.list.result'
   // 'filter:api.user.me.subscription-videos.list.result'

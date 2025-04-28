@@ -1,5 +1,5 @@
 import { Logger } from 'winston';
-import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement } from "@peertube/peertube-types";
+import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement, MUser } from "@peertube/peertube-types";
 import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams } from "../model/params";
 import * as express from "express"
 import { GroupPermissionService } from './group-permission-service';
@@ -173,6 +173,25 @@ export class HookHandlerFactory {
       this.logger.info(Object.keys(result))
       this.logger.info(Object.keys(result.data[0]))
       this.logger.info(Object.keys(params))
+      return result
+    }
+  }
+
+  getAccountVideosListHandler(): Function {
+    return async (
+      result: {
+        data: MVideo[],
+        // total: number,
+      },
+      params: any | {
+        user: MUser
+      }
+    ): Promise<any> => {
+
+      this.logger.warn("accountsVideosListHandler")
+      const userId = params.user.id
+      result.data = result.data.filter((video: MVideo) => this.groupPermissionServices.isUserAllowedForVideo(userId, video.id))
+
       return result
     }
   }
