@@ -21,7 +21,7 @@ export class HookHandlerFactory {
    * When a video is uploaded or its settings are changed
    * @returns 
    */
-  createVideoUpdatedHandler(): Function {
+  getVideoUpdatedHandler(): Function {
     return async (params: VideoUpdateParams) => {
       this.logger.warn("Jetzt läuft action:api.video.updated")
 
@@ -36,7 +36,7 @@ export class HookHandlerFactory {
    * When the original video file is downloaded
    * @returns 
    */
-  createVideoDownloadAllowedHandler(): Function {
+  getVideoDownloadAllowedHandler(): Function {
     return async (
       result: any,
       params: { video: MVideoFullLight, req: express.Request }
@@ -55,7 +55,7 @@ export class HookHandlerFactory {
    * When generated video files are downloaded
    * @returns 
    */
-  createGeneratedVideoDownloadAllowedHandler(): Function {
+  getGeneratedVideoDownloadAllowedHandler(): Function {
     return async (
       result: any,
       params: { video: MVideoFullLight, req: express.Request }
@@ -75,7 +75,7 @@ export class HookHandlerFactory {
    * When a video is watched
    * @returns 
    */
-  createGetVideoHandler(): Function {
+  getGetVideoHandler(): Function {
     return async (
       result: MVideoFormattableDetails,
       params: GetVideoParams
@@ -98,7 +98,7 @@ export class HookHandlerFactory {
    * For the Tab "Browse videos"
    * @returns 
    */
-  createVideoListResultHandler(): Function {
+  getVideoListResultHandler(): Function {
     return async (
       result: { data: any, total: number },
       params: VideoListResultParams): Promise<any> => {
@@ -120,7 +120,7 @@ export class HookHandlerFactory {
    * When using the search bar
    * @returns videos
    */
-  createVideoSearchHandler(): Function {
+  getVideoSearchHandler(): Function {
     return async (
       result: { data: Array<MVideoFormattableDetails>, total?: number },
       params: VideoSearchParams): Promise<any> => {
@@ -139,7 +139,7 @@ export class HookHandlerFactory {
    * When a playlist is watched
    * @returns 
    */
-  createVideoPlaylistHandler(): Function {
+  getVideoPlaylistHandler(): Function {
     return async (
       result: {
         total: any,
@@ -161,7 +161,7 @@ export class HookHandlerFactory {
    * When using the Search bar
    * @returns playlists
    */
-  createVideoPlaylistSearchHandler(): Function {
+  getVideoPlaylistSearchHandler(): Function {
     return async (
       result: any,
       params: any

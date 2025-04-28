@@ -21,35 +21,35 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
 
   registerHook({
     target: 'action:api.video.updated',
-    handler: hookHandlerFactory.createVideoUpdatedHandler()
+    handler: hookHandlerFactory.getVideoUpdatedHandler()
   })
   registerHook({
     target: 'filter:api.download.video.allowed.result',
-    handler: hookHandlerFactory.createVideoDownloadAllowedHandler()
+    handler: hookHandlerFactory.getVideoDownloadAllowedHandler()
   })
   registerHook({
     target: 'filter:api.download.generated-video.allowed.result',
-    handler: hookHandlerFactory.createGeneratedVideoDownloadAllowedHandler()
+    handler: hookHandlerFactory.getGeneratedVideoDownloadAllowedHandler()
   })
   registerHook({
     target: 'filter:api.video.get.result',
-    handler: hookHandlerFactory.createGetVideoHandler()
+    handler: hookHandlerFactory.getGetVideoHandler()
   })
   registerHook({
     target: 'filter:api.videos.list.result',
-    handler: hookHandlerFactory.createVideoListResultHandler()
+    handler: hookHandlerFactory.getVideoListResultHandler()
   })
   registerHook({
     target: 'filter:api.search.videos.local.list.result',
-    handler: hookHandlerFactory.createVideoSearchHandler()
+    handler: hookHandlerFactory.getVideoSearchHandler()
   })
   registerHook({
     target: 'filter:api.video-playlist.videos.list.result',
-    handler: hookHandlerFactory.createVideoPlaylistHandler()
+    handler: hookHandlerFactory.getVideoPlaylistHandler()
   })
   registerHook({
     target: 'filter:api.search.video-playlists.local.list.result',
-    handler: hookHandlerFactory.createVideoPlaylistSearchHandler()
+    handler: hookHandlerFactory.getVideoPlaylistSearchHandler()
   })
   registerHook({
     target: 'filter:api.accounts.videos.list.result',
