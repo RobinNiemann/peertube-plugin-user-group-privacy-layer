@@ -80,7 +80,6 @@ export class HookHandlerFactory {
       result: MVideoFormattableDetails,
       params: GetVideoParams
     ): Promise<MVideo> => {
-
       this.logger.warn("Jetzt läuft filter:api.video.get.result")
 
       const videoId = params.id;
@@ -148,7 +147,6 @@ export class HookHandlerFactory {
       },
       params: any
     ): Promise<any> => {
-
       this.logger.warn("createVideoPlaylistHandler")
 
       const userId = params.user.id
@@ -168,7 +166,6 @@ export class HookHandlerFactory {
       result: any,
       params: any
     ): Promise<any> => {
-
       this.logger.warn("createVideoPlaylistSearchHandler")
       this.logger.info(Object.keys(result))
       this.logger.info(Object.keys(result.data[0]))
@@ -181,16 +178,34 @@ export class HookHandlerFactory {
     return async (
       result: {
         data: MVideo[],
-        // total: number,
       },
       params: any | {
         user: MUser
       }
     ): Promise<any> => {
-
       this.logger.warn("accountsVideosListHandler")
       const userId = params.user.id
       result.data = result.data.filter((video: MVideo) => this.groupPermissionServices.isUserAllowedForVideo(userId, video.id))
+
+      return result
+    }
+  }
+
+  getChannelVideosListHandler(): Function {
+    return async (
+      result: {
+        data: MVideo[],
+        total: number,
+      },
+      params: any | {
+
+      }
+    ): Promise<any> => {
+      this.logger.warn("channelVideosListHandler")
+
+      const userId = params.user.id
+      result.data = result.data.filter((video: MVideo) => this.groupPermissionServices.isUserAllowedForVideo(userId, video.id))
+      result.total = result.data.length
 
       return result
     }
