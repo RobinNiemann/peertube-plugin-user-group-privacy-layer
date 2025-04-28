@@ -17,6 +17,10 @@ export class HookHandlerFactory {
     this.peertubeHelpers = registerServerOptions.peertubeHelpers;
   }
 
+  /**
+   * When a video is uploaded or its settings are changed
+   * @returns 
+   */
   createVideoUpdatedHandler(): Function {
     return async (params: VideoUpdateParams) => {
       this.logger.warn("Jetzt läuft action:api.video.updated")
@@ -28,6 +32,10 @@ export class HookHandlerFactory {
     }
   }
 
+  /**
+   * When the original video file is downloaded
+   * @returns 
+   */
   createVideoDownloadAllowedHandler(): Function {
     return async (
       result: any,
@@ -35,7 +43,7 @@ export class HookHandlerFactory {
     ): Promise<any> => {
       this.logger.warn("Jetzt läuft filter:api.download.video.allowed.result")
 
-      if (this.groupPermissionServices.isUserAllowedForVideo(await this.getUserId(params), params.video.id)) {
+      if (!this.groupPermissionServices.isUserAllowedForVideo(await this.getUserId(params), params.video.id)) {
         this.rejectRequest(params);
       }
 
@@ -43,6 +51,10 @@ export class HookHandlerFactory {
     }
   }
 
+  /**
+   * When generated video files are downloaded
+   * @returns 
+   */
   createGeneratedVideoDownloadAllowedHandler(): Function {
     return async (
       result: any,
@@ -50,7 +62,7 @@ export class HookHandlerFactory {
     ): Promise<any> => {
       this.logger.warn("Jetzt läuft filter:api.download.generated-video.allowed.result")
 
-      if (this.groupPermissionServices.isUserAllowedForVideo(await this.getUserId(params), params.video.id)) {
+      if (!this.groupPermissionServices.isUserAllowedForVideo(await this.getUserId(params), params.video.id)) {
         this.rejectRequest(params);
       }
 
@@ -59,6 +71,10 @@ export class HookHandlerFactory {
   }
 
 
+  /**
+   * When a video is watched
+   * @returns 
+   */
   createGetVideoHandler(): Function {
     return async (
       result: MVideoFormattableDetails,
@@ -79,6 +95,10 @@ export class HookHandlerFactory {
   }
 
 
+  /**
+   * For the Tab "Browse videos"
+   * @returns 
+   */
   createVideoListResultHandler(): Function {
     return async (
       result: { data: any, total: number },
@@ -97,6 +117,10 @@ export class HookHandlerFactory {
   }
 
 
+  /**
+   * When using the search bar
+   * @returns videos
+   */
   createVideoSearchHandler(): Function {
     return async (
       result: { data: Array<MVideoFormattableDetails>, total?: number },
@@ -112,6 +136,10 @@ export class HookHandlerFactory {
     }
   }
 
+  /**
+   * When a playlist is watched
+   * @returns 
+   */
   createVideoPlaylistHandler(): Function {
     return async (
       result: {
@@ -131,6 +159,10 @@ export class HookHandlerFactory {
     }
   }
 
+  /**
+   * When using the Search bar
+   * @returns playlists
+   */
   createVideoPlaylistSearchHandler(): Function {
     return async (
       result: any,

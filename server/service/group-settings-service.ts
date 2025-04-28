@@ -1,6 +1,9 @@
 import { PluginSettingsManager } from "@peertube/peertube-types";
 import { UserGroup } from "../model/user-group";
 
+/**
+ * Reads and parses the markdown settings with the group definition
+ */
 export class GroupSettingsService {
 
   constructor(private settingsManager: PluginSettingsManager) { }

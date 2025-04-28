@@ -11,6 +11,10 @@ export class RouteHandlerFactory {
     this.groupManager = new GroupSettingsService(registerServerOptions.settingsManager);
   }
 
+  /**
+   * 
+   * @returns List of all available user group names
+   */
   createUserGroupsRouteHandler(): RequestHandler {
     return async (req, res, next) => {
       try {
@@ -25,6 +29,10 @@ export class RouteHandlerFactory {
     }
   }
 
+  /**
+   * 
+   * @returns List of groups the current user is in
+   */
   createUserGroupsForCurrentUserRouteHandler(): RequestHandler {
     return async (req, res, next) => {
         try {
