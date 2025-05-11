@@ -230,6 +230,29 @@ export class HookHandlerFactory {
     }
   }
 
+  getUserMeSubscriptionVideosListHandler(): Function {
+    return async (
+      result: any |{
+
+      },
+      params: any | {
+
+      }
+    ): Promise<any> => {
+      this.logger.warn("userMeSubscriptionVideosListHandler")
+      this.logger.error("Hallo!!! Hier bin ich!!!")
+      this.logger.info(Object.keys(result))
+      this.logger.info(Object.keys(result.data[0]))
+      this.logger.info(Object.keys(params))
+
+      const userId = params.user.id
+      result.data = result.data.filter((video: MVideo) => this.groupPermissionServices.isUserAllowedForVideo(userId, video.id))
+      result.total = result.data.length
+
+      return result
+    }
+  }
+
   private async getUserId(params: { req: express.Request }) {
     const authUser = await this.peertubeHelpers.user.getAuthUser(params.req.res!);
     const userId = authUser?.id || -1;

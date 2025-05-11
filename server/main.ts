@@ -63,10 +63,13 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     target: 'filter:api.overviews.videos.list.result',
     handler: hookHandlerFactory.getOverviewVideoListHandler()
   })
+  registerHook({
+    target: 'filter:api.user.me.subscription-videos.list.result',
+    handler: hookHandlerFactory.getUserMeSubscriptionVideosListHandler()
+  })
 
 
   //  TODO
-  // 'filter:api.user.me.subscription-videos.list.result'
   // 'filter:api.search.video-channels.local.list.result'
   // ''
   // 'filter:html.embed.video.allowed.result'
