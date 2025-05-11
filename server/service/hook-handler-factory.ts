@@ -1,5 +1,5 @@
 import { Logger } from 'winston';
-import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement, MUser } from "@peertube/peertube-types";
+import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement, MUser, MChannel } from "@peertube/peertube-types";
 import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams } from "../model/params";
 import * as express from "express"
 import { GroupPermissionService } from './group-permission-service';
@@ -248,6 +248,34 @@ export class HookHandlerFactory {
       const userId = params.user.id
       result.data = result.data.filter((video: MVideo) => this.groupPermissionServices.isUserAllowedForVideo(userId, video.id))
       result.total = result.data.length
+
+      return result
+    }
+  }
+
+  getSearchChannelsListHandler(): Function {
+    return async (
+      result: {
+        data: MChannel[]
+      },
+      params:  {
+        searchTarget: any, // local
+        search: any,
+        start: any,
+        count: any,
+        sort: any,
+        actorId: any,
+      }
+    ): Promise<any> => {
+      this.logger.warn("searchChannelsListHandler")
+      this.logger.info(Object.keys(result))
+      this.logger.info(Object.keys(result.data[0]))
+      this.logger.info(Object.keys(result.data[1]))
+      this.logger.info(Object.keys(params))
+
+      this.logger.info(result.data[0].name)
+      this.logger.info(params.searchTarget)
+      this.logger.info(params.search)
 
       return result
     }
