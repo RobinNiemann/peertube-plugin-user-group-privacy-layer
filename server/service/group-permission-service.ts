@@ -27,7 +27,7 @@ export class GroupPermissionService {
         
         for (const [groupName, value] of Object.entries(groupPluginData)) {
             this.logger.info(`Group ${groupName} has value ${value}`)
-            this.peertubeHelpers.database.query()
+            // this.peertubeHelpers.database.query()
         }
     }
 }
