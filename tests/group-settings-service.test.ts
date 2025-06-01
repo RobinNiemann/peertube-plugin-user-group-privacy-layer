@@ -1,9 +1,9 @@
-import { GroupManager } from './../server/group-manager';
+import { GroupSettingsService } from '../server/service/group-settings-service';
 import { PluginSettingsManager } from '@peertube/peertube-types';
 
 describe('GroupManager', () => {
     let mockSettingsManager: jest.Mocked<PluginSettingsManager>;
-    let groupManager: GroupManager;
+    let groupSettingsService: GroupSettingsService;
 
     beforeEach(() => {
         // Mock PluginSettingsManager
@@ -13,7 +13,7 @@ describe('GroupManager', () => {
             deleteSetting: jest.fn(),
         } as unknown as jest.Mocked<PluginSettingsManager>;
 
-        groupManager = new GroupManager(mockSettingsManager);
+        groupSettingsService = new GroupSettingsService(mockSettingsManager);
     });
 
     it('should parse groups from markdown', async () => {
@@ -27,7 +27,7 @@ describe('GroupManager', () => {
         `;
         mockSettingsManager.getSetting.mockResolvedValue(markdown);
 
-        const groups = await groupManager.getAllGroups();
+        const groups = await groupSettingsService.getAllGroups();
 
         expect(groups).toHaveLength(2);
         expect(groups[0].name).toBe('Group 1');

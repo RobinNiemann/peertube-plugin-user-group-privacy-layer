@@ -1,13 +1,17 @@
-import type { RegisterServerOptions, SettingEntries } from '@peertube/peertube-types'
+import type { RegisterServerOptions } from '@peertube/peertube-types'
 import { RouteHandlerFactory } from './service/route-handler-factory'
 import { HookHandlerFactory } from './service/hook-handler-factory'
 import { GroupPermissionService } from './service/group-permission-service'
+import { DbService } from './service/db-service'
 
 async function register(registerServerOptions: RegisterServerOptions): Promise<void> {
   const { getRouter, registerSetting, settingsManager, registerHook } = registerServerOptions
   const routeHandlerFactory = new RouteHandlerFactory(registerServerOptions)
-  const groupPermissionServices = new GroupPermissionService(registerServerOptions)
+  const dbService = new DbService(registerServerOptions)
+  const groupPermissionServices = new GroupPermissionService(registerServerOptions, dbService)
   const hookHandlerFactory = new HookHandlerFactory(registerServerOptions, groupPermissionServices)
+
+  dbService.initDb()
 
   registerSetting({
     name: "user-group-definition",
@@ -15,11 +19,7 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     type: 'markdown-text',
     private: true
   })
-  settingsManager.onSettingsChange((settings: SettingEntries) => {
-    const userGroupDefinition = settings['user-group-definition']
-    registerServerOptions.peertubeHelpers.logger.info(userGroupDefinition)
-    return Promise.resolve()
-  }) 
+  settingsManager.onSettingsChange(groupPermissionServices.updateUserGroups) 
 
   getRouter().get('/user-groups', routeHandlerFactory.createUserGroupsRouteHandler())
   getRouter().get('/user-groups/current-user', routeHandlerFactory.createUserGroupsForCurrentUserRouteHandler())

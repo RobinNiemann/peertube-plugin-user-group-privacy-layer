@@ -1,7 +1,7 @@
 {
   "name": "peertube-plugin-user-group-sharing",
   "description": "A Peertube Plugin to define groups of users and then share videos/playlists only with certain groups",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "license": "AGPL-3.0",
   "author": {
     "name": "Robin Niemann",
