@@ -44,7 +44,10 @@
     "build": "npm-run-all -s clean check:client:tsc -p build:server build:client build:styles",
     "lint:script": "npx eslint --ext .ts --ext .js .",
     "lint:styles": "stylelint 'assets/**/*.scss'",
-    "test": "npm-run-all -p lint:script lint:styles"
+    "test": "npm-run-all -p lint:script lint:styles",
+    "cli:uninstall": "npx peertube-cli plugins uninstall --npm-name peertube-plugin-user-group-sharing",
+    "cli:install": "npx peertube-cli plugins install --path //plugin/peertube-plugin-user-group-sharing",
+    "cli:reinstall": "npm-run-all -p cli:uninstall build -s cli:install"
   },
   "staticDirs": {
     "images": "public/images"
