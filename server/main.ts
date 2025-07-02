@@ -6,8 +6,8 @@ import { DbService } from './service/db-service'
 
 async function register(registerServerOptions: RegisterServerOptions): Promise<void> {
   const { getRouter, registerSetting, settingsManager, registerHook } = registerServerOptions
-  const routeHandlerFactory = new RouteHandlerFactory(registerServerOptions)
   const dbService = new DbService(registerServerOptions)
+  const routeHandlerFactory = new RouteHandlerFactory(registerServerOptions, dbService)
   const groupPermissionServices = new GroupPermissionService(registerServerOptions, dbService)
   const hookHandlerFactory = new HookHandlerFactory(registerServerOptions, groupPermissionServices)
 
@@ -17,9 +17,16 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     name: "user-group-definition",
     label: 'User Group Definition',
     type: 'markdown-text',
-    private: true
-  })
-  settingsManager.onSettingsChange(groupPermissionServices.updateUserGroups) 
+    private: true,
+    descriptionHTML: `Use Markdown bullet points to create a YAML-like structure for user groups.
+    For example:
+    <pre>
+    - group_name: Gruppe 1
+      members:
+        - root
+        - user1
+    </pre>`})
+  settingsManager.onSettingsChange((settings) => groupPermissionServices.updateUserGroups(settings)) 
 
   getRouter().get('/user-groups', routeHandlerFactory.createUserGroupsRouteHandler())
   getRouter().get('/user-groups/current-user', routeHandlerFactory.createUserGroupsForCurrentUserRouteHandler())

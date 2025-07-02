@@ -4,7 +4,7 @@ import { UserGroup } from "../model/user-group";
 
 export class DbService {
 
-    private readonly REINITIALIZE_DB = true
+    private readonly REINITIALIZE_DB = false
 
     private logger: Logger
     private peertubeHelpers: PeerTubeHelpers
@@ -73,26 +73,98 @@ export class DbService {
     }
 
     public async updateUserGroups(userGroups: UserGroup[]) {
-        // TODO Gruppen löschen, cascade zu Mitglieder
-
-        for (const group of userGroups){
-            // TODO Gruppen hinzufügen
-
-            // TODO Gruppenmitglieder speichern
-            const memberUserIds = await Promise.all(group.members.map(this.getUserIdByName))
-            this.logger.debug(memberUserIds)
-
-            await this.peertubeHelpers.database.query(`
-                
-            `);
+        await this.peertubeHelpers.database.query('DELETE FROM user_group_2_user');
+        await this.peertubeHelpers.database.query('DELETE FROM user_group');
+        
+        for (const group of userGroups) {
+            const [insertResult] = await this.peertubeHelpers.database.query(
+                `INSERT INTO user_group (group_name) VALUES ('${group.name}') RETURNING id`
+            );
+            const groupId = insertResult[0].id;
+            
+            const memberUserIds = await Promise.all(
+                group.members.map(userName => this.getUserIdByName(userName))
+            );
+            
+            for (const userId of memberUserIds) {
+                if (userId) {
+                    await this.peertubeHelpers.database.query(
+                        `INSERT INTO user_group_2_user (user_group_id, user_id) VALUES (${groupId}, ${userId})`
+                    );
+                }
+            }
         }
+        
+        this.logger.info(`Updated ${userGroups.length} user groups`);
     }
 
-    private async getUserIdByName(userName: string): Promise<number> {
-        return await this.peertubeHelpers.database.query(`
-            SELECT id FROM user
-            WHERE username = '${userName}';
-            `)
+    private async getUserIdByName(userName: string): Promise<number | null> {
+        const result = await this.peertubeHelpers.database.query(
+            `SELECT id FROM "user" WHERE username = '${userName}'`
+        );
+        const [rows] = result;
+        return rows.length > 0 ? rows[0].id : null;
+    }
+    
+    public async setVideoGroupPermissions(videoId: number, groupNames: string[]) {
+        await this.peertubeHelpers.database.query(
+            `DELETE FROM user_group_2_video WHERE video_id = ${videoId}`
+        );
+        
+        for (const groupName of groupNames) {
+            const result = await this.peertubeHelpers.database.query(
+                `SELECT id FROM user_group WHERE group_name = '${groupName}'`
+            );
+            const [rows] = result;
+            
+            if (rows.length > 0) {
+                await this.peertubeHelpers.database.query(
+                    `INSERT INTO user_group_2_video (user_group_id, video_id) VALUES (${rows[0].id}, ${videoId})`
+                );
+            }
+        }
+    }
+    
+    public async getUserGroupsForUser(userId: number): Promise<string[]> {
+        const result = await this.peertubeHelpers.database.query(`
+            SELECT ug.group_name 
+            FROM user_group ug
+            JOIN user_group_2_user ugu ON ug.id = ugu.user_group_id
+            WHERE ugu.user_id = ${userId}
+        `);
+        const [rows] = result;
+        return rows.map((row: any) => row.group_name);
+    }
+    
+    public async getVideoGroupPermissions(videoId: number): Promise<string[]> {
+        const result = await this.peertubeHelpers.database.query(`
+            SELECT ug.group_name 
+            FROM user_group ug
+            JOIN user_group_2_video ugv ON ug.id = ugv.user_group_id
+            WHERE ugv.video_id = ${videoId}
+        `);
+        const [rows] = result;
+        return rows.map((row: any) => row.group_name);
+    }
+    
+    public async getAllUserGroups(): Promise<string[]> {
+        const result = await this.peertubeHelpers.database.query(
+            `SELECT group_name FROM user_group ORDER BY group_name`
+        );
+        const [rows] = result;
+        return rows.map((row: any) => row.group_name);
+    }
+    
+    public async isVideoOwner(userId: number, videoId: number): Promise<boolean> {
+        const result = await this.peertubeHelpers.database.query(`
+            SELECT COUNT(*) as count 
+            FROM video v
+            JOIN "videoChannel" vc ON v."channelId" = vc.id
+            JOIN account a ON vc."accountId" = a.id
+            WHERE v.id = ${videoId} AND a."userId" = ${userId}
+        `);
+        const [rows] = result;
+        return parseInt(rows[0].count) > 0;
     }
 
 }

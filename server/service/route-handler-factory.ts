@@ -1,14 +1,14 @@
-import { GroupSettingsService } from './group-settings-service';
+import { DbService } from './db-service';
 import { PeerTubeHelpers, RegisterServerOptions } from '@peertube/peertube-types';
 import { RequestHandler, Response } from 'express';
 
 export class RouteHandlerFactory {
   private peertubeHelpers: PeerTubeHelpers;
-  private groupManager: GroupSettingsService;
+  private dbService: DbService;
 
-  constructor(registerServerOptions: RegisterServerOptions) {
+  constructor(registerServerOptions: RegisterServerOptions, dbService: DbService) {
     this.peertubeHelpers = registerServerOptions.peertubeHelpers;
-    this.groupManager = new GroupSettingsService(registerServerOptions.settingsManager);
+    this.dbService = dbService;
   }
 
   /**
@@ -19,8 +19,7 @@ export class RouteHandlerFactory {
     return async (req, res, next) => {
       try {
         await this.getAuthUser(res)
-        const userGroups = await this.groupManager.getAllGroups()
-        const userGroupNames = userGroups.map(group => group.name)
+        const userGroupNames = await this.dbService.getAllUserGroups()
         res.json(userGroupNames)
 
       } catch (error: unknown) {
@@ -37,7 +36,7 @@ export class RouteHandlerFactory {
     return async (req, res, next) => {
         try {
           const authUser = await this.getAuthUser(res)
-          const userGroups = await this.groupManager.getGroupsForUser(authUser.username)
+          const userGroups = await this.dbService.getUserGroupsForUser(authUser.id)
           res.json(userGroups)
 
         } catch (error: unknown) {
