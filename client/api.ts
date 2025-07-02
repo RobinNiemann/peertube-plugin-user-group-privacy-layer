@@ -15,8 +15,12 @@ export class Api {
   }
 
 
-  async getUserGroups (): Promise<string[]> {
+  async getUserGroups (): Promise<{id: number, name: string}[]> {
     return this.get(this.pluginBasePath + '/user-groups')
+  }
+  
+  async getVideoGroupsByUUID (videoUUID: string): Promise<number[]> {
+    return this.get(this.pluginBasePath + '/video-groups/' + videoUUID)
   }
 
 }

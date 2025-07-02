@@ -147,12 +147,23 @@ export class DbService {
         return rows.map((row: any) => row.group_name);
     }
     
-    public async getAllUserGroups(): Promise<string[]> {
+    public async getAllUserGroupsWithIds(): Promise<{id: number, name: string}[]> {
         const result = await this.peertubeHelpers.database.query(
-            `SELECT group_name FROM user_group ORDER BY group_name`
+            `SELECT id, group_name as name FROM user_group ORDER BY group_name`
         );
         const [rows] = result;
-        return rows.map((row: any) => row.group_name);
+        return rows;
+    }
+    
+    public async getVideoGroupsByUUID(videoUUID: string): Promise<number[]> {
+        const result = await this.peertubeHelpers.database.query(`
+            SELECT ugv.user_group_id
+            FROM user_group_2_video ugv
+            JOIN video v ON ugv.video_id = v.id
+            WHERE v.uuid::text = '${videoUUID}'
+        `);
+        const [rows] = result;
+        return rows.map((row: any) => row.user_group_id);
     }
     
     public async isVideoOwner(userId: number, videoId: number): Promise<boolean> {

@@ -19,8 +19,8 @@ export class RouteHandlerFactory {
     return async (req, res, next) => {
       try {
         await this.getAuthUser(res)
-        const userGroupNames = await this.dbService.getAllUserGroups()
-        res.json(userGroupNames)
+        const userGroups = await this.dbService.getAllUserGroupsWithIds()
+        res.json(userGroups)
 
       } catch (error: unknown) {
         this.handleError(error, res);
@@ -40,6 +40,27 @@ export class RouteHandlerFactory {
           res.json(userGroups)
 
         } catch (error: unknown) {
+          this.handleError(error, res);
+        }
+      }
+    }
+    
+    createVideoGroupsRouteHandler(): RequestHandler {
+      return async (req, res, next) => {
+        try {
+          await this.getAuthUser(res)
+          const videoUUID = req.params.videoUUID
+          const groupIds = await this.dbService.getVideoGroupsByUUID(videoUUID)
+          
+          // Prevent caching to ensure fresh data
+          res.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+          res.set('Pragma', 'no-cache')
+          res.set('Expires', '0')
+          
+          res.json(groupIds)
+
+        } catch (error: unknown) {
+          this.peertubeHelpers.logger.error(`Error in getVideoGroups for ${req.params.videoId}:`, error)
           this.handleError(error, res);
         }
       }
