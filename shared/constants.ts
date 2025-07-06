@@ -1,0 +1,1 @@
+export const VIDEO_FIELD_GROUP_PREFIX = 'user-group-'

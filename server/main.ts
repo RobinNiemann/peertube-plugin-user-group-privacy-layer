@@ -19,13 +19,13 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     type: 'markdown-text',
     private: true,
     descriptionHTML: `Use Markdown bullet points to create a YAML-like structure for user groups.
-    For example:
-    <pre>
-    - group_name: Gruppe 1
-      members:
-        - root
-        - user1
-    </pre>`})
+For example:
+<pre>
+- group_name: Gruppe 1
+  members:
+    - root
+    - user1
+</pre>`})
   settingsManager.onSettingsChange((settings) => groupPermissionServices.updateUserGroups(settings)) 
 
   getRouter().get('/user-groups', routeHandlerFactory.createUserGroupsRouteHandler())

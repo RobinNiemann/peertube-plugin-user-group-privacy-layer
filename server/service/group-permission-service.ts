@@ -2,6 +2,7 @@ import { RegisterServerOptions, SettingEntries } from "@peertube/peertube-types"
 import { Logger } from "winston";
 import { DbService } from "./db-service";
 import { parse as yamlParse } from "yaml";
+import { VIDEO_FIELD_GROUP_PREFIX } from '../../shared/constants';
 
 export class GroupPermissionService {
 
@@ -41,12 +42,28 @@ export class GroupPermissionService {
     }
 
     public async setPermissionsForVideo(videoId: number, groupPluginData: { [key: string]: any }) {
-        const selectedGroups = Object.entries(groupPluginData)
-            .filter(([_, value]) => value === true || value === 'true')
-            .map(([groupName, _]) => groupName);
+        // Sammle alle ausgewählten Gruppen aus den Plugin-Daten
+        const selectedGroupIds: number[] = []
+        for (const [fieldName, value] of Object.entries(groupPluginData)) {
+          if (fieldName.startsWith(VIDEO_FIELD_GROUP_PREFIX) && value === 'true') {
+            const groupId = parseInt(fieldName.replace(VIDEO_FIELD_GROUP_PREFIX, ''))
+            selectedGroupIds.push(groupId)
+          }
+        }
         
-        this.logger.info(`Setting video ${videoId} permissions for groups: [${selectedGroups.join(', ')}]`);
-        await this.dbService.setVideoGroupPermissions(videoId, selectedGroups);
+        this.logger.info(`Setting video ${videoId} permissions for group IDs: [${selectedGroupIds.join(', ')}]`);
+        await this.dbService.setVideoGroupPermissionsByIds(videoId, selectedGroupIds);
+    }
+    
+    public async loadPluginDataForVideo(video: any, videoId: number) {
+        const groupIds = await this.dbService.getVideoGroupIds(videoId);
+        
+        video.pluginData = video.pluginData || {};
+        
+        // Setze alle Group-Checkboxen auf false
+        for (const groupId of groupIds) {
+            video.pluginData[VIDEO_FIELD_GROUP_PREFIX + groupId] = 'true';
+        }
     }
     
     public async updateUserGroups(settings: SettingEntries): Promise<any> {

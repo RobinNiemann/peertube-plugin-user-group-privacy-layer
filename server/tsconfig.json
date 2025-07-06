@@ -14,7 +14,7 @@
 		"removeComments": true,
 		"sourceMap": true,
 
-		"outDir": "../dist/server/",
+		"outDir": "../dist",
 		"paths": {}
 	},
 	"include": [

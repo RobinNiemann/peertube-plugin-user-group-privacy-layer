@@ -77,13 +77,16 @@ export class HookHandlerFactory {
    */
   getGetVideoHandler(): any {
     return async (
-      result: MVideoFormattableDetails,
+      result: MVideoFormattableDetails & { pluginData?: any },
       params: GetVideoParams
     ): Promise<MVideo> => {
       this.logger.warn("Jetzt läuft filter:api.video.get.result")
 
       const videoId = params.id;
       const userId = await this.getUserId(params);
+
+      // Lade die Plugin-Daten für dieses Video
+      await this.groupPermissionServices.loadPluginDataForVideo(result, videoId);
 
       if (!(await this.groupPermissionServices.isUserAllowedForVideo(userId, videoId))) {
         this.rejectRequest(params)

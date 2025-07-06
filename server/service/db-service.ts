@@ -125,6 +125,18 @@ export class DbService {
         }
     }
     
+    public async setVideoGroupPermissionsByIds(videoId: number, groupIds: number[]) {
+        await this.peertubeHelpers.database.query(
+            `DELETE FROM user_group_2_video WHERE video_id = ${videoId}`
+        );
+        
+        for (const groupId of groupIds) {
+            await this.peertubeHelpers.database.query(
+                `INSERT INTO user_group_2_video (user_group_id, video_id) VALUES (${groupId}, ${videoId})`
+            );
+        }
+    }
+    
     public async getUserGroupsForUser(userId: number): Promise<string[]> {
         const result = await this.peertubeHelpers.database.query(`
             SELECT ug.group_name 
@@ -153,6 +165,16 @@ export class DbService {
         );
         const [rows] = result;
         return rows;
+    }
+    
+    public async getVideoGroupIds(videoId: number): Promise<number[]> {
+        const result = await this.peertubeHelpers.database.query(`
+            SELECT user_group_id 
+            FROM user_group_2_video 
+            WHERE video_id = ${videoId}
+        `);
+        const [rows] = result;
+        return rows.map((row: any) => row.user_group_id);
     }
     
     public async getVideoGroupsByUUID(videoUUID: string): Promise<number[]> {
