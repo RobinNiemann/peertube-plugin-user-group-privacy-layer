@@ -73,6 +73,7 @@ export class DbService {
     }
 
     public async updateUserGroups(userGroups: UserGroup[]) {
+        await this.peertubeHelpers.database.query('DELETE FROM user_group_2_video');
         await this.peertubeHelpers.database.query('DELETE FROM user_group_2_user');
         await this.peertubeHelpers.database.query('DELETE FROM user_group');
         
