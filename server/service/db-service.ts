@@ -106,25 +106,6 @@ export class DbService {
         return rows.length > 0 ? rows[0].id : null;
     }
     
-    public async setVideoGroupPermissions(videoId: number, groupNames: string[]) {
-        await this.peertubeHelpers.database.query(
-            `DELETE FROM user_group_2_video WHERE video_id = ${videoId}`
-        );
-        
-        for (const groupName of groupNames) {
-            const result = await this.peertubeHelpers.database.query(
-                `SELECT id FROM user_group WHERE group_name = '${groupName}'`
-            );
-            const [rows] = result;
-            
-            if (rows.length > 0) {
-                await this.peertubeHelpers.database.query(
-                    `INSERT INTO user_group_2_video (user_group_id, video_id) VALUES (${rows[0].id}, ${videoId})`
-                );
-            }
-        }
-    }
-    
     public async setVideoGroupPermissionsByIds(videoId: number, groupIds: number[]) {
         await this.peertubeHelpers.database.query(
             `DELETE FROM user_group_2_video WHERE video_id = ${videoId}`
