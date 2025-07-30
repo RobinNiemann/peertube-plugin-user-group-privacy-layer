@@ -73,16 +73,46 @@ export class DbService {
     }
 
     public async updateUserGroups(userGroups: UserGroup[]) {
-        await this.peertubeHelpers.database.query('DELETE FROM user_group_2_video');
-        await this.peertubeHelpers.database.query('DELETE FROM user_group_2_user');
-        await this.peertubeHelpers.database.query('DELETE FROM user_group');
+        // Get current groups from database
+        const currentGroups = await this.getAllUserGroupsWithIds();
+        const newGroupNames = userGroups.map(g => g.name);
         
-        for (const group of userGroups) {
-            const [insertResult] = await this.peertubeHelpers.database.query(
-                `INSERT INTO user_group (group_name) VALUES ('${group.name}') RETURNING id`
+        // Find groups to delete (exist in DB but not in new config)
+        const groupsToDelete = currentGroups.filter(current => 
+            !newGroupNames.includes(current.name)
+        );
+        
+        // Delete video associations and user associations for removed groups
+        for (const groupToDelete of groupsToDelete) {
+            await this.peertubeHelpers.database.query(
+                `DELETE FROM user_group_2_video WHERE user_group_id = ${groupToDelete.id}`
             );
-            const groupId = insertResult[0].id;
+            await this.peertubeHelpers.database.query(
+                `DELETE FROM user_group WHERE id = ${groupToDelete.id}`
+            );
+        }
+        
+        // Delete all user associations (will be recreated)
+        await this.peertubeHelpers.database.query('DELETE FROM user_group_2_user');
+        
+        // Process each group from config
+        for (const group of userGroups) {
+            // Check if group already exists
+            const existingGroup = currentGroups.find(current => current.name === group.name);
+            let groupId: number;
             
+            if (existingGroup) {
+                // Group exists, use existing ID
+                groupId = existingGroup.id;
+            } else {
+                // Create new group
+                const [insertResult] = await this.peertubeHelpers.database.query(
+                    `INSERT INTO user_group (group_name) VALUES ('${group.name}') RETURNING id`
+                );
+                groupId = insertResult[0].id;
+            }
+            
+            // Add user associations (always recreated)
             const memberUserIds = await Promise.all(
                 group.members.map(userName => this.getUserIdByName(userName))
             );
@@ -96,7 +126,7 @@ export class DbService {
             }
         }
         
-        this.logger.info(`Updated ${userGroups.length} user groups`);
+        this.logger.info(`Updated ${userGroups.length} user groups. Deleted ${groupsToDelete.length} removed groups.`);
     }
 
     private async getUserIdByName(userName: string): Promise<number | null> {
