@@ -85,12 +85,11 @@ export class HookHandlerFactory {
       const videoId = params.id;
       const userId = await this.getUserId(params);
 
-      // Lade die Plugin-Daten für dieses Video
-      await this.groupPermissionServices.loadPluginDataForVideo(result, videoId);
-
       if (!(await this.groupPermissionServices.isUserAllowedForVideo(userId, videoId))) {
         this.rejectRequest(params)
       }
+      
+      await this.groupPermissionServices.loadPluginDataForVideo(result, videoId);
 
       return result
     }

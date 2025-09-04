@@ -1,5 +1,6 @@
 import type { RegisterClientOptions } from '@peertube/peertube-types/client'
 import { RegisterClientVideoFieldOptions } from '@peertube/peertube-types'
+import { USER_GROUP_SELECTION_FIELD } from '../shared/constants'
 
 const REGISTER_VIDEO_FIELD_TYPES: Array<RegisterClientVideoFieldOptions['type']> =
     ['update', 'upload', 'import-url', 'import-torrent', 'go-live']
@@ -11,7 +12,7 @@ async function register({
     for (const type of REGISTER_VIDEO_FIELD_TYPES) {
         // Register hidden textarea field for data storage
         registerVideoField({
-            name: 'user-group-selection',
+            name: USER_GROUP_SELECTION_FIELD,
             label: 'Selected User Groups (Internal)',
             type: 'input-textarea',
             default: '[]',

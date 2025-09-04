@@ -2,7 +2,7 @@ import { RegisterServerOptions, SettingEntries } from "@peertube/peertube-types"
 import { Logger } from "winston";
 import { DbService } from "./db-service";
 import { parse as yamlParse } from "yaml";
-import { VIDEO_FIELD_GROUP_PREFIX } from '../../shared/constants';
+import { USER_GROUP_SELECTION_FIELD } from '../../shared/constants';
 
 export class GroupPermissionService {
 
@@ -45,8 +45,8 @@ export class GroupPermissionService {
         let selectedGroupIds: number[] = []
         
         // Parse group IDs from JSON format
-        if (groupPluginData['user-group-selection']) {
-            const groupSelectionValue = groupPluginData['user-group-selection'];
+        if (groupPluginData[USER_GROUP_SELECTION_FIELD]) {
+            const groupSelectionValue = groupPluginData[USER_GROUP_SELECTION_FIELD];
             if (groupSelectionValue && groupSelectionValue.trim() !== '') {
                 try {
                     const parsedArray = JSON.parse(groupSelectionValue);
@@ -68,10 +68,10 @@ export class GroupPermissionService {
         
         video.pluginData = video.pluginData || {};
         
-        // Setze alle Group-Checkboxen auf false
-        for (const groupId of groupIds) {
-            video.pluginData[VIDEO_FIELD_GROUP_PREFIX + groupId] = 'true';
-        }
+        // Set the user-group-selection field with the correct JSON format
+        video.pluginData[USER_GROUP_SELECTION_FIELD] = JSON.stringify(groupIds.map(String));
+        
+        this.logger.info(`Loaded plugin data for video ${videoId}: ${USER_GROUP_SELECTION_FIELD} = ${video.pluginData[USER_GROUP_SELECTION_FIELD]}`);
     }
     
     public async updateUserGroups(settings: SettingEntries): Promise<any> {
