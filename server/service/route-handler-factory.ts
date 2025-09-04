@@ -1,6 +1,7 @@
 import { DbService } from './db-service';
 import { PeerTubeHelpers, RegisterServerOptions } from '@peertube/peertube-types';
 import { RequestHandler, Response } from 'express';
+import shortUuid from 'short-uuid';
 
 export class RouteHandlerFactory {
   private peertubeHelpers: PeerTubeHelpers;
@@ -49,7 +50,12 @@ export class RouteHandlerFactory {
       return async (req, res, next) => {
         try {
           await this.getAuthUser(res)
-          const videoUUID = req.params.videoUUID
+          const videoShortUUID = req.params.videoShortUUID
+          
+          // Convert short UUID to full UUID  
+          const translator = shortUuid()
+          const videoUUID = translator.toUUID(videoShortUUID)
+          
           const groupIds = await this.dbService.getVideoGroupsByUUID(videoUUID)
           
           // Prevent caching to ensure fresh data

@@ -88,6 +88,9 @@ export class DbService {
                 `DELETE FROM user_group_2_video WHERE user_group_id = ${groupToDelete.id}`
             );
             await this.peertubeHelpers.database.query(
+                `DELETE FROM user_group_2_user WHERE user_group_id = ${groupToDelete.id}`
+            );
+            await this.peertubeHelpers.database.query(
                 `DELETE FROM user_group WHERE id = ${groupToDelete.id}`
             );
         }

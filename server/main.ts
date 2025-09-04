@@ -30,7 +30,7 @@ For example:
 
   getRouter().get('/user-groups', routeHandlerFactory.createUserGroupsRouteHandler())
   getRouter().get('/user-groups/current-user', routeHandlerFactory.createUserGroupsForCurrentUserRouteHandler())
-  getRouter().get('/video-groups/:videoUUID', routeHandlerFactory.createVideoGroupsRouteHandler())
+  getRouter().get('/video-groups/:videoShortUUID', routeHandlerFactory.createVideoGroupsRouteHandler())
 
   registerHook({
     target: 'action:api.video.updated',

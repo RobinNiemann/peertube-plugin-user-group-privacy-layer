@@ -42,13 +42,21 @@ export class GroupPermissionService {
     }
 
     public async setPermissionsForVideo(videoId: number, groupPluginData: { [key: string]: any }) {
-        // Sammle alle ausgewählten Gruppen aus den Plugin-Daten
-        const selectedGroupIds: number[] = []
-        for (const [fieldName, value] of Object.entries(groupPluginData)) {
-          if (fieldName.startsWith(VIDEO_FIELD_GROUP_PREFIX) && value === 'true') {
-            const groupId = parseInt(fieldName.replace(VIDEO_FIELD_GROUP_PREFIX, ''))
-            selectedGroupIds.push(groupId)
-          }
+        let selectedGroupIds: number[] = []
+        
+        // Parse group IDs from JSON format
+        if (groupPluginData['user-group-selection']) {
+            const groupSelectionValue = groupPluginData['user-group-selection'];
+            if (groupSelectionValue && groupSelectionValue.trim() !== '') {
+                try {
+                    const parsedArray = JSON.parse(groupSelectionValue);
+                    if (Array.isArray(parsedArray)) {
+                        selectedGroupIds = parsedArray.map((id: any) => parseInt(id)).filter((id: number) => !isNaN(id));
+                    }
+                } catch (error) {
+                    this.logger.error('Failed to parse group selection JSON:', error, 'Value:', groupSelectionValue);
+                }
+            }
         }
         
         this.logger.info(`Setting video ${videoId} permissions for group IDs: [${selectedGroupIds.join(', ')}]`);
