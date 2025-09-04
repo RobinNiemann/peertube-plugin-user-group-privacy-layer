@@ -51,8 +51,8 @@ export class DbService {
             CREATE TABLE IF NOT EXISTS user_group_2_video (
                 user_group_id INTEGER NOT NULL,
                 video_id INTEGER NOT NULL,
-                FOREIGN KEY (user_group_id) REFERENCES user_group(id),
-                FOREIGN KEY (video_id) REFERENCES video(id),
+                FOREIGN KEY (user_group_id) REFERENCES user_group(id) ON DELETE CASCADE,
+                FOREIGN KEY (video_id) REFERENCES video(id) ON DELETE CASCADE,
                 PRIMARY KEY (user_group_id, video_id)
             );
         `);
@@ -64,8 +64,8 @@ export class DbService {
             CREATE TABLE IF NOT EXISTS user_group_2_user (
                 user_group_id INTEGER NOT NULL,
                 user_id INTEGER NOT NULL,
-                FOREIGN KEY (user_group_id) REFERENCES user_group(id),
-                FOREIGN KEY (user_id) REFERENCES "user"(id),
+                FOREIGN KEY (user_group_id) REFERENCES user_group(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
                 PRIMARY KEY (user_group_id, user_id)
             );
         `);
