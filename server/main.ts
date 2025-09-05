@@ -81,12 +81,6 @@ For example:
     handler: hookHandlerFactory.getUserMeSubscriptionVideosListHandler()
   })
 
-
-  //  TODO
-  // ''
-  // 'filter:html.embed.video.allowed.result'
-  // 'filter:html.embed.video-playlist.allowed.result'
-
   }
 
 async function unregister(): Promise<void> { }

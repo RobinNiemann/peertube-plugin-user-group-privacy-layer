@@ -1,20 +1,26 @@
 import type { RegisterClientOptions } from '@peertube/peertube-types/client'
 import { RegisterClientVideoFieldOptions } from '@peertube/peertube-types'
 import { USER_GROUP_SELECTION_FIELD } from '../shared/constants'
+import { Api } from './api'
+import { UserGroupSelectionUpdater } from './user-group-selection-updater'
 
 const REGISTER_VIDEO_FIELD_TYPES: Array<RegisterClientVideoFieldOptions['type']> =
     ['update', 'upload', 'import-url', 'import-torrent', 'go-live']
 
 async function register({
-    registerVideoField
+    peertubeHelpers,
+    registerVideoField,
+    registerHook
 }: RegisterClientOptions): Promise<void> {
+    const api = new Api(peertubeHelpers.getAuthHeader)
+    const userGroupSelectionUpdater = new UserGroupSelectionUpdater(api)
 
     for (const type of REGISTER_VIDEO_FIELD_TYPES) {
         // Register hidden textarea field for data storage
         registerVideoField({
             name: USER_GROUP_SELECTION_FIELD,
             label: 'Selected User Groups (Internal)',
-            type: 'input-textarea',
+            type: 'input',
             default: '[]',
             hidden: () => false,
             descriptionHTML: 'This field stores the selected group IDs as JSON. Please use the checkboxes below to select groups.'
@@ -34,6 +40,13 @@ async function register({
             tab: 'plugin-settings'
         })
     }
+
+    registerHook({
+        target: 'action:video-edit.init',
+        handler: () => {
+            setTimeout(() => userGroupSelectionUpdater.initialize(), 1000)
+        }
+    })
 }
 
 function createUserGroupSelectorHTML(): string {

@@ -1,5 +1,5 @@
 import { Logger } from 'winston';
-import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement, MUser, MChannel } from "@peertube/peertube-types";
+import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement, MUser } from "@peertube/peertube-types";
 import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams } from "../model/params";
 import * as express from "express"
 import { GroupPermissionService } from './group-permission-service';
