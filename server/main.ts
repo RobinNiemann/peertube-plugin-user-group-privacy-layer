@@ -80,10 +80,6 @@ For example:
     target: 'filter:api.user.me.subscription-videos.list.result',
     handler: hookHandlerFactory.getUserMeSubscriptionVideosListHandler()
   })
-  registerHook({
-    target: 'filter:api.search.video-channels.local.list.result',
-    handler: hookHandlerFactory.getSearchChannelsListHandler()
-  })
 
 
   //  TODO

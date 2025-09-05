@@ -187,7 +187,7 @@ export class HookHandlerFactory {
     ): Promise<any> => {
       this.logger.warn("createVideoPlaylistSearchHandler")
       this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(result.data[0]))
+      this.logger.info(Object.keys(result.data))
       this.logger.info(Object.keys(params))
       return result
     }
@@ -276,12 +276,6 @@ export class HookHandlerFactory {
 
       }
     ): Promise<any> => {
-      this.logger.warn("userMeSubscriptionVideosListHandler")
-      this.logger.error("Hallo!!! Hier bin ich!!!")
-      this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(result.data[0]))
-      this.logger.info(Object.keys(params))
-
       const userId = params.user.id
       const videoPermissions = await Promise.all(
         result.data.map(async (video: MVideo) => ({
@@ -291,34 +285,6 @@ export class HookHandlerFactory {
       )
       result.data = videoPermissions.filter(({allowed}) => allowed).map(({video}) => video)
       result.total = result.data.length
-
-      return result
-    }
-  }
-
-  getSearchChannelsListHandler(): any {
-    return async (
-      result: {
-        data: MChannel[]
-      },
-      params:  {
-        searchTarget: any, // local
-        search: any,
-        start: any,
-        count: any,
-        sort: any,
-        actorId: any,
-      }
-    ): Promise<any> => {
-      this.logger.warn("searchChannelsListHandler")
-      this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(result.data[0]))
-      this.logger.info(Object.keys(result.data[1]))
-      this.logger.info(Object.keys(params))
-
-      this.logger.info(result.data[0].name)
-      this.logger.info(params.searchTarget)
-      this.logger.info(params.search)
 
       return result
     }
