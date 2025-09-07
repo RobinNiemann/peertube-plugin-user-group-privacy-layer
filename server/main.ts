@@ -4,6 +4,15 @@ import { HookHandlerFactory } from './service/hook-handler-factory'
 import { GroupPermissionService } from './service/group-permission-service'
 import { DbService } from './service/db-service'
 
+const VideoPrivacy = {
+  PUBLIC: 1
+} as const
+
+const VideoPlaylistPrivacy = {
+  PUBLIC: 1,
+  UNLISTED: 2
+} as const
+
 async function register(registerServerOptions: RegisterServerOptions): Promise<void> {
   const { getRouter, registerSetting, settingsManager, registerHook } = registerServerOptions
   const dbService = new DbService(registerServerOptions)
@@ -80,6 +89,12 @@ For example:
     target: 'filter:api.user.me.subscription-videos.list.result',
     handler: hookHandlerFactory.getUserMeSubscriptionVideosListHandler()
   })
+
+  // Disable PUBLIC privacy option for videos, because with it video files are publicly accessible
+  registerServerOptions.videoPrivacyManager.deleteConstant(VideoPrivacy.PUBLIC)
+  // Disable PUBLIC and UNLISTED privacy option for playlists, because currently blocked videos remain visible in playlist thumbnails
+  registerServerOptions.playlistPrivacyManager.deleteConstant(VideoPlaylistPrivacy.PUBLIC)
+  registerServerOptions.playlistPrivacyManager.deleteConstant(VideoPlaylistPrivacy.UNLISTED)
 
   }
 
