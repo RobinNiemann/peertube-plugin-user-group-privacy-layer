@@ -53,7 +53,7 @@
     "images": "public/images"
   },
   "translations": {
-    "fr-FR": "./languages/fr.json"
+    "de": "./languages/de.json"
   },
   "devDependencies": {
     "@peertube/peertube-types": "^7.0.0",

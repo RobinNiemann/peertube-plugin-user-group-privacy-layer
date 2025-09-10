@@ -22,7 +22,6 @@ async function register({
             label: 'Selected User Groups (Internal)',
             type: 'input',
             default: '[]',
-            hidden: () => false,
             descriptionHTML: 'This field stores the selected group IDs as JSON. Please use the checkboxes below to select groups.'
         }, {
             type: type,

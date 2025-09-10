@@ -37,7 +37,7 @@ async function register(registerServerOptions: RegisterServerOptions): Promise<v
     descriptionHTML: `Use Markdown bullet points to create a YAML-like structure for user groups.
 For example:
 <pre>
-- group_name: Gruppe 1
+- group_name: Group 1
   members:
     - root
     - user1
