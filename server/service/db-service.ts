@@ -4,8 +4,6 @@ import { UserGroup } from "../model/user-group";
 
 export class DbService {
 
-    private readonly REINITIALIZE_DB = false
-
     private logger: Logger
     private peertubeHelpers: PeerTubeHelpers
 
@@ -14,62 +12,6 @@ export class DbService {
     ) {
         this.logger = registerServerOptions.peertubeHelpers.logger;
         this.peertubeHelpers = registerServerOptions.peertubeHelpers;
-    }
-
-    public async initDb() {
-        if (this.REINITIALIZE_DB) {
-            await this.delete_old_tables();
-        }
-
-        await this.createUserGroupsTable();
-        await this.createUserGroupVideoMappingTable();
-        await this.createUserGroupUserMappingTable();
-    }
-
-    
-    private async delete_old_tables() {
-        await this.peertubeHelpers.database.query(`
-            DROP TABLE IF EXISTS user_group_2_video;
-            DROP TABLE IF EXISTS user_group_2_user;
-            DROP TABLE IF EXISTS user_group;
-        `)
-        this.logger.info("Tables deleted")
-    }
-
-    private async createUserGroupsTable() {
-        await this.peertubeHelpers.database.query(`
-            CREATE TABLE IF NOT EXISTS user_group (
-                id SERIAL PRIMARY KEY,
-                group_name VARCHAR(255) NOT NULL
-            );
-        `);
-        this.logger.info("Table user_group created")
-    }
-
-    private async createUserGroupVideoMappingTable() {
-        await this.peertubeHelpers.database.query(`
-            CREATE TABLE IF NOT EXISTS user_group_2_video (
-                user_group_id INTEGER NOT NULL,
-                video_id INTEGER NOT NULL,
-                FOREIGN KEY (user_group_id) REFERENCES user_group(id) ON DELETE CASCADE,
-                FOREIGN KEY (video_id) REFERENCES video(id) ON DELETE CASCADE,
-                PRIMARY KEY (user_group_id, video_id)
-            );
-        `);
-        this.logger.info("Table user_group_2_video created")
-    }
-
-    private async createUserGroupUserMappingTable() {
-        await this.peertubeHelpers.database.query(`
-            CREATE TABLE IF NOT EXISTS user_group_2_user (
-                user_group_id INTEGER NOT NULL,
-                user_id INTEGER NOT NULL,
-                FOREIGN KEY (user_group_id) REFERENCES user_group(id) ON DELETE CASCADE,
-                FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
-                PRIMARY KEY (user_group_id, user_id)
-            );
-        `);
-        this.logger.info("Table user_group_2_user created")
     }
 
     public async updateUserGroups(userGroups: UserGroup[]) {

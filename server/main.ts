@@ -3,6 +3,7 @@ import { RouteHandlerFactory } from './service/route-handler-factory'
 import { HookHandlerFactory } from './service/hook-handler-factory'
 import { GroupPermissionService } from './service/group-permission-service'
 import { DbService } from './service/db-service'
+import { MigrationRunner } from './migrations/migration-runner'
 
 const VideoPrivacy = {
   PUBLIC: 1
@@ -14,14 +15,20 @@ const VideoPlaylistPrivacy = {
 } as const
 
 async function register(registerServerOptions: RegisterServerOptions): Promise<void> {
-  const { getRouter, registerSetting, settingsManager, registerHook } = registerServerOptions
+  const { getRouter, registerSetting, settingsManager, registerHook, peertubeHelpers } = registerServerOptions
+  
+  // Dependency Injection
+  const migrationRunner = new MigrationRunner(peertubeHelpers.database, peertubeHelpers.logger)
   const dbService = new DbService(registerServerOptions)
   const routeHandlerFactory = new RouteHandlerFactory(registerServerOptions, dbService)
   const groupPermissionServices = new GroupPermissionService(registerServerOptions, dbService)
   const hookHandlerFactory = new HookHandlerFactory(registerServerOptions, groupPermissionServices)
-
-  dbService.initDb()
-
+  
+  // Configuration flags
+  const REINITIALIZE_DB = false
+  
+  await migrationRunner.initializeDatabase(REINITIALIZE_DB)
+  
   registerSetting({
     name: "user-group-definition",
     label: 'User Group Definition',
