@@ -15,5 +15,5 @@
 	"runArgs": ["--group-add=docker", "--network=local_default"],
 	
 	// Run commands after each container start
-	"postStartCommand": "sudo chgrp docker /var/run/docker.sock && sudo chmod g+rw /var/run/docker.sock && grep -q 'peertube.localhost' /etc/hosts || echo '172.18.0.5 peertube.localhost' | sudo tee -a /etc/hosts && bash -c 'source .devcontainer/ClaudeCode/.env && peertube-cli auth add -u \"http://peertube.localhost:9000\" -U \"root\" --password \"$PEERTUBE_PASSWORD\" 2>/dev/null || true'"
+	"postStartCommand": ".devcontainer/ClaudeCode/post-start.sh"
 }
