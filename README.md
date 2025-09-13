@@ -21,5 +21,9 @@ After saving the groups every video will have the options to select the groups t
 - If a video is the first in a playlist it will be visible in the playlists thumbnail. This is a loophole that currently cannot be closed; there is to plugin hook for that. Because of that this plugin will disable the privacy options "Public" and "Unlisted" for playlists so that noone else can cause a privacy leak by adding a video to a playlist. (I mainly developed this plugin for my purposes. If someone wants to use it and dislikes this decision, feel free to create a GitHub issue regarding a feature toggle.)
 - If someone had access to a video before and watched it it will continue to show up in the watch history even though it cannot be watched again. (Also currently to Plugin Hook to filter that)
 
+## Future Ideas
+Ideas how to improve this plugin:
+- Give groups IDs so that the name can be changed without deleting and recreating the group
+
 ## Development
 To quickly update the plugin in the debugging instance run `npm run cli:reinstall`
