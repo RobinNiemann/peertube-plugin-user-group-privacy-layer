@@ -5,10 +5,6 @@ import { GroupPermissionService } from './service/group-permission-service'
 import { DbService } from './service/db-service'
 import { MigrationRunner } from './migrations/migration-runner'
 
-const VideoPrivacy = {
-  PUBLIC: 1
-} as const
-
 const VideoPlaylistPrivacy = {
   PUBLIC: 1,
   UNLISTED: 2
@@ -97,8 +93,6 @@ For example:
     handler: hookHandlerFactory.getUserMeSubscriptionVideosListHandler()
   })
 
-  // Disable PUBLIC privacy option for videos, because with it video files are publicly accessible
-  registerServerOptions.videoPrivacyManager.deleteConstant(VideoPrivacy.PUBLIC)
   // Disable PUBLIC and UNLISTED privacy option for playlists, because currently blocked videos remain visible in playlist thumbnails
   registerServerOptions.playlistPrivacyManager.deleteConstant(VideoPlaylistPrivacy.PUBLIC)
   registerServerOptions.playlistPrivacyManager.deleteConstant(VideoPlaylistPrivacy.UNLISTED)
