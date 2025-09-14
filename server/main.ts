@@ -73,10 +73,6 @@ For example:
     handler: hookHandlerFactory.getVideoPlaylistHandler()
   })
   registerHook({
-    target: 'filter:api.search.video-playlists.local.list.result',
-    handler: hookHandlerFactory.getVideoPlaylistSearchHandler()
-  })
-  registerHook({
     target: 'filter:api.accounts.videos.list.result',
     handler: hookHandlerFactory.getAccountVideosListHandler()
   })
