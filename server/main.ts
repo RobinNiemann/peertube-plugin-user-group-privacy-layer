@@ -92,6 +92,10 @@ For example:
     target: 'filter:api.user.me.subscription-videos.list.result',
     handler: hookHandlerFactory.getUserMeSubscriptionVideosListHandler()
   })
+  registerHook({
+    target: 'action:notifier.notification.created',
+    handler: hookHandlerFactory.getNotificationCreatedHandler()
+  })
 
   // Disable PUBLIC and UNLISTED privacy option for playlists, because currently blocked videos remain visible in playlist thumbnails
   registerServerOptions.playlistPrivacyManager.deleteConstant(VideoPlaylistPrivacy.PUBLIC)

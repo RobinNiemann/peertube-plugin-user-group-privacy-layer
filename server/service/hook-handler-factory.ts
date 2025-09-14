@@ -1,6 +1,6 @@
 import { Logger } from 'winston';
 import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement, MUser } from "@peertube/peertube-types";
-import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams } from "../model/params";
+import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams, NotificationCreatedParams } from "../model/params";
 import * as express from "express"
 import { GroupPermissionService } from './group-permission-service';
 
@@ -23,7 +23,6 @@ export class HookHandlerFactory {
    */
   getVideoUpdatedHandler(): any {
     return async (params: VideoUpdateParams) => {
-      this.logger.warn("Jetzt läuft action:api.video.updated")
 
       if (params.body.pluginData) {
         await this.groupPermissionServices.setPermissionsForVideo(params.video.id, params.body.pluginData)
@@ -41,7 +40,6 @@ export class HookHandlerFactory {
       result: any,
       params: { video: MVideoFullLight, req: express.Request }
     ): Promise<any> => {
-      this.logger.warn("Jetzt läuft filter:api.download.video.allowed.result")
 
       if (!(await this.groupPermissionServices.isUserAllowedForVideo(await this.getUserId(params), params.video.id))) {
         this.rejectRequest(params);
@@ -60,7 +58,6 @@ export class HookHandlerFactory {
       result: any,
       params: { video: MVideoFullLight, req: express.Request }
     ): Promise<any> => {
-      this.logger.warn("Jetzt läuft filter:api.download.generated-video.allowed.result")
 
       if (!(await this.groupPermissionServices.isUserAllowedForVideo(await this.getUserId(params), params.video.id))) {
         this.rejectRequest(params);
@@ -80,8 +77,6 @@ export class HookHandlerFactory {
       result: MVideoFormattableDetails & { pluginData?: any },
       params: GetVideoParams
     ): Promise<MVideo> => {
-      this.logger.warn("Jetzt läuft filter:api.video.get.result")
-
       const videoId = params.id;
       const userId = await this.getUserId(params);
 
@@ -104,8 +99,6 @@ export class HookHandlerFactory {
     return async (
       result: { data: any, total: number },
       params: VideoListResultParams): Promise<any> => {
-
-      this.logger.warn("VideoListResultHandler")
 
       const userId = params.user.id
       const videoPermissions = await Promise.all(
@@ -131,8 +124,6 @@ export class HookHandlerFactory {
     return async (
       result: { data: Array<MVideoFormattableDetails>, total?: number },
       params: VideoSearchParams): Promise<any> => {
-
-      this.logger.warn("VideoSearchHandler")
 
       const userId = params.user.id
       const videoPermissions = await Promise.all(
@@ -160,7 +151,6 @@ export class HookHandlerFactory {
       },
       params: any
     ): Promise<any> => {
-      this.logger.warn("createVideoPlaylistHandler")
 
       const userId = params.user.id
       const elementPermissions = await Promise.all(
@@ -176,23 +166,6 @@ export class HookHandlerFactory {
     }
   }
 
-  /**
-   * When using the Search bar
-   * @returns playlists
-   */
-  getVideoPlaylistSearchHandler(): any {
-    return async (
-      result: any,
-      params: any
-    ): Promise<any> => {
-      this.logger.warn("createVideoPlaylistSearchHandler")
-      this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(result.data))
-      this.logger.info(Object.keys(params))
-      return result
-    }
-  }
-
   getAccountVideosListHandler(): any {
     return async (
       result: {
@@ -202,7 +175,6 @@ export class HookHandlerFactory {
         user: MUser
       }
     ): Promise<any> => {
-      this.logger.warn("accountsVideosListHandler")
       const userId = params.user.id
       const videoPermissions = await Promise.all(
         result.data.map(async (video: MVideo) => ({
@@ -226,8 +198,6 @@ export class HookHandlerFactory {
 
       }
     ): Promise<any> => {
-      this.logger.warn("channelVideosListHandler")
-
       const userId = params.user.id
       const videoPermissions = await Promise.all(
         result.data.map(async (video: MVideo) => ({
@@ -247,11 +217,7 @@ export class HookHandlerFactory {
       result: any,
       params: any
     ): Promise<any> => {
-      this.logger.warn("overviewVideoListHandler")
-      this.logger.error("Hallo!!! Hier bin ich!!!")
-      this.logger.info(Object.keys(result))
-      this.logger.info(Object.keys(result.data[0]))
-      this.logger.info(Object.keys(params))
+      this.logger.error("THE HOOK overviewVideoListHandler WICH I NEVER MANAGED TO TRIGGER HAS BEEN FINALLY FIRED")
 
       const userId = params.user.id
       const videoPermissions = await Promise.all(
@@ -287,6 +253,29 @@ export class HookHandlerFactory {
       result.total = result.data.length
 
       return result
+    }
+  }
+
+  /**
+   * When a notification is created
+   * @returns 
+   */
+  getNotificationCreatedHandler(): any {
+    return async (params: NotificationCreatedParams) => {
+      const { notification, user } = params;
+      
+      if (!notification.videoId) {
+        return params
+      }
+
+      const allowed = await this.groupPermissionServices.isUserAllowedForVideo(user.id, notification.videoId);
+      
+      if (!allowed) {
+        await notification.destroy();
+        this.logger.info(`Notification ${notification.id} blocked and deleted for user ${user.id} (video ${notification.videoId})`)
+      }
+
+      return params
     }
   }
 

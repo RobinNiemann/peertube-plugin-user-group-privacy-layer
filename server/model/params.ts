@@ -41,3 +41,19 @@ export type VideoSearchParams = {
     nsfw: any
     user: any
 }
+
+export type NotificationCreatedParams = {
+    webNotificationEnabled: boolean
+    emailNotificationEnabled: boolean
+    user: {
+        id: number
+    }
+    notification: {
+        id: number
+        read: boolean
+        type: number
+        userId: number
+        videoId: number | null
+        destroy: () => Promise<void>
+    }
+}
