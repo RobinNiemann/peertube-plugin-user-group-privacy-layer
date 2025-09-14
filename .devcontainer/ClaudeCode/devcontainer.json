@@ -1,0 +1,19 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "Claude Code",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"remoteUser": "node",
+
+	// Mount Docker socket from WSL2 host
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+	],
+
+	// Add user to docker group for non-root docker access and connect to PeerTube network
+	"runArgs": ["--group-add=docker", "--network=local_default"],
+	
+	// Run commands after each container start
+	"postStartCommand": ".devcontainer/ClaudeCode/post-start.sh"
+}

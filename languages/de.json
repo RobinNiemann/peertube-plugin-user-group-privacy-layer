@@ -1,0 +1,8 @@
+{
+  "Selected User Groups (Internal)": "Ausgewählte Benutzergruppen (Intern)",
+  "This field stores the selected group IDs as JSON. Please use the checkboxes below to select groups.": "Dieses Feld speichert die ausgewählten Gruppen-IDs als JSON. Bitte verwende die Kontrollkästchen unten, um Gruppen auszuwählen.",
+  "User Groups": "Benutzergruppen",
+  "Loading user groups...": "Benutzergruppen werden geladen...",
+  "User Group Definition": "Definition der Benutzergruppen",
+  "Use Markdown bullet points to create a YAML-like structure for user groups.\nFor example:\n<pre>\n- group_name: Group 1\n  members:\n    - root\n    - user1\n</pre>": "Verwende Markdown-Aufzählungspunkte, um eine YAML-ähnliche Struktur für Benutzergruppen zu erstellen.\nZum Beispiel:\n<pre>\n- group_name: Gruppe 1\n  members:\n    - root\n    - user1\n</pre>"
+}
