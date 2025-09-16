@@ -18,6 +18,9 @@ export class GroupPermissionService {
     }
     
     public async isUserAllowedForVideo(userId: number, videoId: number): Promise<boolean> {
+        if (!userId || !videoId) {
+            return false;
+        }
         // Check if user owns the video
         const isOwner = await this.dbService.isVideoOwner(userId, videoId);
         if (isOwner) {

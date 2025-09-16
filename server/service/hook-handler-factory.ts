@@ -100,7 +100,7 @@ export class HookHandlerFactory {
       result: { data: any, total: number },
       params: VideoListResultParams): Promise<any> => {
 
-      const userId = params.user.id
+      const userId = params.user?.id
       const videoPermissions = await Promise.all(
         result.data.map(async (video: MVideoFormattableDetails) => ({
           video,
