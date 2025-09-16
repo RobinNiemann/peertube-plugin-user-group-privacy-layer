@@ -50,7 +50,7 @@ async function register({
 
 function createUserGroupSelectorHTML(): string {
     return `
-        <div class="user-group-selector" data-plugin="user-group-sharing">
+        <div class="user-group-selector" data-plugin="user-group-privacy-layer">
             <div class="group-checkboxes">
                 Loading user groups...
             </div>

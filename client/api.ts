@@ -1,7 +1,7 @@
 
 export class Api {
   getAuthHeader: () => { Authorization: string } | undefined
-  pluginBasePath = `/plugins/user-group-sharing/router`
+  pluginBasePath = `/plugins/user-group-privacy-layer/router`
 
   constructor (getAuthHeader?: () => { Authorization: string } | undefined) {
     this.getAuthHeader = getAuthHeader ? getAuthHeader : () => undefined
