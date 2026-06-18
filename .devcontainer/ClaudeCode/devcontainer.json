@@ -1,19 +1,14 @@
-// See https://containers.dev/implementors/json_reference/ for configuration reference
 {
-	"name": "Claude Code",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
-	"remoteUser": "node",
-
-	// Mount Docker socket from WSL2 host
-	"mounts": [
-		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-	],
-
-	// Add user to docker group for non-root docker access and connect to PeerTube network
-	"runArgs": ["--group-add=docker", "--network=local_default"],
-	
-	// Run commands after each container start
-	"postStartCommand": ".devcontainer/ClaudeCode/post-start.sh"
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/node:2.0.0": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
+  "mounts": [
+    "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume"
+  ],
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude"
 }
