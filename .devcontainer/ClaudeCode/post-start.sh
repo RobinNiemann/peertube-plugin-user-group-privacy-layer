@@ -6,8 +6,10 @@ sudo chmod g+rw /var/run/docker.sock
 
 # Add PeerTube host entry if not already present
 if ! grep -q 'peertube.localhost' /etc/hosts; then
-    # Find PeerTube container IP dynamically
-    PEERTUBE_CONTAINER=$(docker ps -q --filter "name=peertube" 2>/dev/null)
+    # Find PeerTube container IP dynamically (match the app container only,
+    # not the sibling services of the "peertube-local" compose project)
+    PEERTUBE_CONTAINER=$(docker ps -q \
+        --filter "label=com.docker.compose.service=peertube" 2>/dev/null | head -n1)
     
     if [ -n "$PEERTUBE_CONTAINER" ]; then
         PEERTUBE_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$PEERTUBE_CONTAINER" 2>/dev/null | head -n1)

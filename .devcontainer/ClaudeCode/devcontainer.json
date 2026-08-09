@@ -10,5 +10,6 @@
   "mounts": [
     "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume"
   ],
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude"
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude && npm install -g @peertube/peertube-cli",
+  "postStartCommand": "bash .devcontainer/ClaudeCode/post-start.sh"
 }

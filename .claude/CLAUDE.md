@@ -2,6 +2,11 @@
 
 Dieses Repository enthält ein Peertube Plugin, welches die Zugriffssteuerung auf Videos anhand von User Groups ermöglicht.
 
+# Anforderungen
+- In den Plugin-Einstellungen kann ein Admin User Groups als JSON definieren und den Gruppen User zuordnen
+- In den Einstellungen jedes Videos können User Groups ausgewählt werden. Diese Verknüpfung wird in der DB gespeichert
+- Überall, wo Videos angezeigt werden, hat der Nutzer nur Zugriff auf Videos, die min. 1 seiner Gruppen freigegeben wurde. Nicht freigegebene Videos können nicht angesehen werden und werden auch nirgens in Übersichtslisten angezeigt, sondern vorher herausgefiltert.
+
 # Projektstruktur
 - Die Projektstruktur richtet sich nach den Vorgaben von PeerTube und deren Beispiel-Plugin.
     - Wesentlich sind die Ordner client und server, die die Logik dieses Plugins enthalten
