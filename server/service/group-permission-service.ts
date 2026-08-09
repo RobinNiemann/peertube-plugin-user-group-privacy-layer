@@ -44,6 +44,24 @@ export class GroupPermissionService {
         return hasAccess;
     }
 
+    /**
+     * Batch variant of isUserAllowedForVideo for list endpoints: resolves which of the given
+     * candidate video IDs the user may access (owned or shared via one of their groups) using a
+     * few queries instead of two per video.
+     */
+    public async getAllowedVideoIds(userId: number, candidateVideoIds: number[]): Promise<Set<number>> {
+        if (!userId || userId < 0 || candidateVideoIds.length === 0) {
+            return new Set();
+        }
+
+        const [ownedIds, groupAllowedIds] = await Promise.all([
+            this.dbService.getOwnedVideoIds(userId, candidateVideoIds),
+            this.dbService.getGroupAllowedVideoIds(userId, candidateVideoIds)
+        ]);
+
+        return new Set([...ownedIds, ...groupAllowedIds]);
+    }
+
     public async setPermissionsForVideo(videoId: number, groupPluginData: { [key: string]: any }) {
         let selectedGroupIds: number[] = []
         

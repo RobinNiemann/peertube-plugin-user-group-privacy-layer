@@ -60,34 +60,33 @@ For example:
     target: 'filter:api.video.get.result',
     handler: hookHandlerFactory.getGetVideoHandler()
   })
-  registerHook({
-    target: 'filter:api.videos.list.result',
-    handler: hookHandlerFactory.getVideoListResultHandler()
-  })
-  registerHook({
-    target: 'filter:api.search.videos.local.list.result',
-    handler: hookHandlerFactory.getVideoSearchHandler()
-  })
-  registerHook({
-    target: 'filter:api.video-playlist.videos.list.result',
-    handler: hookHandlerFactory.getVideoPlaylistHandler()
-  })
-  registerHook({
-    target: 'filter:api.accounts.videos.list.result',
-    handler: hookHandlerFactory.getAccountVideosListHandler()
-  })
-  registerHook({
-    target: 'filter:api.video-channels.videos.list.result',
-    handler: hookHandlerFactory.getChannelVideosListHandler()
-  })
-  registerHook({
-    target: 'filter:api.overviews.videos.list.result',
-    handler: hookHandlerFactory.getOverviewVideoListHandler()
-  })
-  registerHook({
-    target: 'filter:api.user.me.subscription-videos.list.result',
-    handler: hookHandlerFactory.getUserMeSubscriptionVideosListHandler()
-  })
+  // List endpoints: each needs a params hook (widen the query window) paired with a result hook
+  // (filter by group permissions, then re-paginate) so pagination stays correct. See
+  // docs/bugfix-missing-videos.md.
+  const videoListParamsHandler = hookHandlerFactory.buildListParamsHandler()
+  const videoIdResultHandler = hookHandlerFactory.buildListResultHandler(item => item.id)
+  const playlistResultHandler = hookHandlerFactory.buildListResultHandler(item => item.videoId)
+
+  registerHook({ target: 'filter:api.videos.list.params', handler: videoListParamsHandler })
+  registerHook({ target: 'filter:api.videos.list.result', handler: videoIdResultHandler })
+
+  registerHook({ target: 'filter:api.search.videos.local.list.params', handler: videoListParamsHandler })
+  registerHook({ target: 'filter:api.search.videos.local.list.result', handler: videoIdResultHandler })
+
+  registerHook({ target: 'filter:api.video-playlist.videos.list.params', handler: videoListParamsHandler })
+  registerHook({ target: 'filter:api.video-playlist.videos.list.result', handler: playlistResultHandler })
+
+  registerHook({ target: 'filter:api.accounts.videos.list.params', handler: videoListParamsHandler })
+  registerHook({ target: 'filter:api.accounts.videos.list.result', handler: videoIdResultHandler })
+
+  registerHook({ target: 'filter:api.video-channels.videos.list.params', handler: videoListParamsHandler })
+  registerHook({ target: 'filter:api.video-channels.videos.list.result', handler: videoIdResultHandler })
+
+  registerHook({ target: 'filter:api.overviews.videos.list.params', handler: videoListParamsHandler })
+  registerHook({ target: 'filter:api.overviews.videos.list.result', handler: videoIdResultHandler })
+
+  registerHook({ target: 'filter:api.user.me.subscription-videos.list.params', handler: videoListParamsHandler })
+  registerHook({ target: 'filter:api.user.me.subscription-videos.list.result', handler: videoIdResultHandler })
   registerHook({
     target: 'action:notifier.notification.created',
     handler: hookHandlerFactory.getNotificationCreatedHandler()

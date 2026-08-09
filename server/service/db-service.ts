@@ -145,6 +145,41 @@ export class DbService {
         return rows.map((row: any) => row.user_group_id);
     }
     
+    /**
+     * Returns the subset of candidateVideoIds the user may access through one of their groups.
+     */
+    public async getGroupAllowedVideoIds(userId: number, candidateVideoIds: number[]): Promise<number[]> {
+        if (candidateVideoIds.length === 0) {
+            return [];
+        }
+        const result = await this.peertubeHelpers.database.query(`
+            SELECT DISTINCT ugv.video_id AS id
+            FROM user_group_2_video ugv
+            JOIN user_group_2_user ugu ON ugu.user_group_id = ugv.user_group_id
+            WHERE ugu.user_id = :userId AND ugv.video_id IN (:videoIds)
+        `, { replacements: { userId, videoIds: candidateVideoIds } });
+        const [rows] = result;
+        return rows.map((row: any) => row.id);
+    }
+
+    /**
+     * Returns the subset of candidateVideoIds the user owns.
+     */
+    public async getOwnedVideoIds(userId: number, candidateVideoIds: number[]): Promise<number[]> {
+        if (candidateVideoIds.length === 0) {
+            return [];
+        }
+        const result = await this.peertubeHelpers.database.query(`
+            SELECT v.id AS id
+            FROM video v
+            JOIN "videoChannel" vc ON v."channelId" = vc.id
+            JOIN account a ON vc."accountId" = a.id
+            WHERE a."userId" = :userId AND v.id IN (:videoIds)
+        `, { replacements: { userId, videoIds: candidateVideoIds } });
+        const [rows] = result;
+        return rows.map((row: any) => row.id);
+    }
+
     public async isVideoOwner(userId: number, videoId: number): Promise<boolean> {
         const result = await this.peertubeHelpers.database.query(`
             SELECT COUNT(*) as count 

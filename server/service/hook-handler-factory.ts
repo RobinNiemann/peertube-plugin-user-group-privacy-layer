@@ -1,13 +1,17 @@
 import { Logger } from 'winston';
-import { MVideo, MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions, MVideoPlaylistElement, MUser } from "@peertube/peertube-types";
-import { GetVideoParams, VideoListResultParams, VideoSearchParams, VideoUpdateParams, NotificationCreatedParams } from "../model/params";
+import { MVideoFormattableDetails, MVideoFullLight, PeerTubeHelpers, RegisterServerOptions } from "@peertube/peertube-types";
+import { GetVideoParams, VideoUpdateParams, NotificationCreatedParams } from "../model/params";
 import * as express from "express"
 import { GroupPermissionService } from './group-permission-service';
 
+/** Key under which the originally requested page (start/count) is stashed on the query options. */
+const PAGE_STASH_KEY = '__userGroupPrivacyPage'
 
 export class HookHandlerFactory {
   private logger: Logger
   private peertubeHelpers: PeerTubeHelpers
+  /** Upper bound of videos fetched per list request before group filtering + re-pagination. */
+  private readonly MAX_FETCH = 5000
 
   constructor(
     registerServerOptions: RegisterServerOptions,
@@ -76,7 +80,7 @@ export class HookHandlerFactory {
     return async (
       result: MVideoFormattableDetails & { pluginData?: any },
       params: GetVideoParams
-    ): Promise<MVideo> => {
+    ): Promise<MVideoFormattableDetails> => {
       const videoId = params.id;
       const userId = await this.getUserId(params);
 
@@ -92,165 +96,46 @@ export class HookHandlerFactory {
 
 
   /**
-   * For the Tab "Browse videos"
-   * @returns 
+   * Inflates the query window (start=0, count=MAX_FETCH) so the matching result handler can filter
+   * by group permissions BEFORE re-paginating. The originally requested page is stashed on the
+   * options object, which PeerTube passes through to the result hook.
    */
-  getVideoListResultHandler(): any {
-    return async (
-      result: { data: any, total: number },
-      params: VideoListResultParams): Promise<any> => {
-
-      const userId = params.user?.id
-      const videoPermissions = await Promise.all(
-        result.data.map(async (video: MVideoFormattableDetails) => ({
-          video,
-          allowed: await this.groupPermissionServices.isUserAllowedForVideo(userId, video.id)
-        }))
-      )
-      result.data = videoPermissions.filter(({allowed}) => allowed).map(({video}) => video)
-
-      result.total = result.data.length
-
-      return result
-    }
-  }
-
-
-  /**
-   * When using the search bar
-   * @returns videos
-   */
-  getVideoSearchHandler(): any {
-    return async (
-      result: { data: Array<MVideoFormattableDetails>, total?: number },
-      params: VideoSearchParams): Promise<any> => {
-
-      const userId = params.user.id
-      const videoPermissions = await Promise.all(
-        result.data.map(async (video: MVideoFormattableDetails) => ({
-          video,
-          allowed: await this.groupPermissionServices.isUserAllowedForVideo(userId, video.id)
-        }))
-      )
-      result.data = videoPermissions.filter(({allowed}) => allowed).map(({video}) => video)
-      result.total = result.data.length
-
-      return result
+  buildListParamsHandler(): any {
+    return async (params: any): Promise<any> => {
+      params[PAGE_STASH_KEY] = {
+        start: Number(params.start) || 0,
+        count: Number(params.count) || 0
+      }
+      params.start = 0
+      params.count = this.MAX_FETCH
+      return params
     }
   }
 
   /**
-   * When a playlist is watched
-   * @returns 
+   * Filters a video list result by group permissions, then slices it back to the originally
+   * requested page so `total` and the page contents stay consistent with PeerTube's pagination.
+   * `getVideoId` extracts the video id from a data item (plain videos vs. playlist elements).
    */
-  getVideoPlaylistHandler(): any {
+  buildListResultHandler(getVideoId: (item: any) => number): any {
     return async (
-      result: {
-        total: any,
-        data: MVideoPlaylistElement[]
-      },
+      result: { data: any[], total?: number },
       params: any
     ): Promise<any> => {
+      const userId = params.user?.id ?? -1
 
-      const userId = params.user.id
-      const elementPermissions = await Promise.all(
-        result.data.map(async (playlistElement: MVideoPlaylistElement) => ({
-          playlistElement,
-          allowed: await this.groupPermissionServices.isUserAllowedForVideo(userId, playlistElement.videoId)
-        }))
-      )
-      result.data = elementPermissions.filter(({allowed}) => allowed).map(({playlistElement}) => playlistElement)
-      result.total = result.data.length
-
-      return result
-    }
-  }
-
-  getAccountVideosListHandler(): any {
-    return async (
-      result: {
-        data: MVideo[],
-      },
-      params: any | {
-        user: MUser
+      if (result.data.length >= this.MAX_FETCH) {
+        this.logger.warn(`User group privacy filter hit MAX_FETCH (${this.MAX_FETCH}); allowed videos may be truncated for user ${userId}.`)
       }
-    ): Promise<any> => {
-      const userId = params.user.id
-      const videoPermissions = await Promise.all(
-        result.data.map(async (video: MVideo) => ({
-          video,
-          allowed: await this.groupPermissionServices.isUserAllowedForVideo(userId, video.id)
-        }))
-      )
-      result.data = videoPermissions.filter(({allowed}) => allowed).map(({video}) => video)
 
-      return result
-    }
-  }
+      const candidateIds = result.data.map(getVideoId)
+      const allowedIds = await this.groupPermissionServices.getAllowedVideoIds(userId, candidateIds)
+      const filtered = result.data.filter(item => allowedIds.has(getVideoId(item)))
 
-  getChannelVideosListHandler(): any {
-    return async (
-      result: {
-        data: MVideo[],
-        total: number,
-      },
-      params: any | {
+      const page = params[PAGE_STASH_KEY] ?? { start: Number(params.start) || 0, count: filtered.length }
 
-      }
-    ): Promise<any> => {
-      const userId = params.user.id
-      const videoPermissions = await Promise.all(
-        result.data.map(async (video: MVideo) => ({
-          video,
-          allowed: await this.groupPermissionServices.isUserAllowedForVideo(userId, video.id)
-        }))
-      )
-      result.data = videoPermissions.filter(({allowed}) => allowed).map(({video}) => video)
-      result.total = result.data.length
-
-      return result
-    }
-  }
-
-  getOverviewVideoListHandler(): any {
-    return async (
-      result: any,
-      params: any
-    ): Promise<any> => {
-      this.logger.error("THE HOOK overviewVideoListHandler WICH I NEVER MANAGED TO TRIGGER HAS BEEN FINALLY FIRED")
-
-      const userId = params.user.id
-      const videoPermissions = await Promise.all(
-        result.data.map(async (video: MVideo) => ({
-          video,
-          allowed: await this.groupPermissionServices.isUserAllowedForVideo(userId, video.id)
-        }))
-      )
-      result.data = videoPermissions.filter(({allowed}) => allowed).map(({video}) => video)
-      result.total = result.data.length
-
-      return result
-    }
-  }
-
-  getUserMeSubscriptionVideosListHandler(): any {
-    return async (
-      result: any |{
-
-      },
-      params: any | {
-
-      }
-    ): Promise<any> => {
-      const userId = params.user.id
-      const videoPermissions = await Promise.all(
-        result.data.map(async (video: MVideo) => ({
-          video,
-          allowed: await this.groupPermissionServices.isUserAllowedForVideo(userId, video.id)
-        }))
-      )
-      result.data = videoPermissions.filter(({allowed}) => allowed).map(({video}) => video)
-      result.total = result.data.length
+      result.total = filtered.length
+      result.data = filtered.slice(page.start, page.start + page.count)
 
       return result
     }
